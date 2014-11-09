@@ -20,7 +20,7 @@
  * This class is used to decode an ICD file.
  * 
  * @author  Philippe Venne
- * @version 0.1
+ * @version 0.2
  *
  */
 
@@ -463,11 +463,14 @@ public class IEC61850_GOOSE_ICD_file {
 			
 			boolean found_LDevice = false;
 			
+			//TODO FIx This
+			
 			// Retrieves all elements named "LDevice" within the SCL file
 			elementFilter = new ElementFilter("LDevice");
 			
-			// Search for a LDevice block with name matching ldInstance in the whole SCL file
-			for(Iterator<Element> LDevice_IT = xml_document.getRootElement().getDescendants(elementFilter); LDevice_IT.hasNext();)
+			// Search for a LDevice block with name matching ldInstance in the IED section
+			//for(Iterator<Element> LDevice_IT = xml_document.getRootElement().getDescendants(elementFilter); LDevice_IT.hasNext();)
+			for(Iterator<Element> LDevice_IT = IED_section.getDescendants(elementFilter); LDevice_IT.hasNext();)	
 			{
 				Element current_element = LDevice_IT.next();
 				
