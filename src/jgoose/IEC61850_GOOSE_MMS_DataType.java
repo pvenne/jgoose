@@ -43,7 +43,7 @@ public enum IEC61850_GOOSE_MMS_DataType
 	 bit_string			(0x84,	"Quality", 	"Timestamp"),
 	 integer			(0x85,	"INT16", 	"INT32", 	"INT8", 	"Enum"),
 	 unsign				(0x86,	"INT8U", 	"INT16U", 	"INT32U"),
-	 float_point		(0x87,	"FLOAT32", 	"FLOAT16"),
+	 float_point		(0x87,	"FLOAT64", 	"FLOAT32"),
 	 octet_string		(0x89),
 	 visible_string		(0x8a),
 	 generalized_time	(0x8b),
