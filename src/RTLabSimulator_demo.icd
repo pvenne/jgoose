@@ -1,94 +1,77 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
-<!-- 
-This file is part of jgoose.
-
-jgoose is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-jgoose is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with jgoose.  If not, see <http://www.gnu.org/licenses/>.
--->
-
 <SCL xmlns="http://www.iec.ch/61850/2003/SCL" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
    <Header id="" version="3"/>
    <Communication>
       <SubNetwork name="SN_LOCAL">
-         <ConnectedAP apName="AP_RTLAB" iedName="IED_RTLAB">
+         <ConnectedAP iedName="IED_RTLAB" apName="AP_RTLAB">
             <Address>
                <P type="IP">127.0.0.1</P>
                <P type="IP-SUBNET">255.255.255.0</P>
                <P type="IP-GATEWAY">127.0.0.1</P>
                <P type="MAC-Address">00-00-00-00-00-00</P>
             </Address>
-            <GSE cbName="CB_FROM_RTLAB" ldInst="LD_RTLAB">
+            <GSE ldInst="LD_RTLAB" cbName="CB_FROM_RTLAB">
                <Address>
                   <P type="VLAN-ID">000</P>
                   <P type="VLAN-PRIORITY">4</P>
                   <P type="MAC-Address">01-0C-CD-01-00-02</P>
                   <P type="APPID">0001</P>
                </Address>
-               <MinTime multiplier="m" unit="s">250</MinTime>
-               <MaxTime multiplier="m" unit="s">2000</MaxTime>
+               <MinTime unit="s" multiplier="m">250</MinTime>
+               <MaxTime unit="s" multiplier="m">2000</MaxTime>
             </GSE>
-            <GSE cbName="CB_TO_RTLAB" ldInst="LD_PC">
+            <GSE ldInst="LD_PC" cbName="CB_TO_RTLAB">
                <Address>
                   <P type="VLAN-ID">000</P>
                   <P type="VLAN-PRIORITY">4</P>
                   <P type="MAC-Address">01-0C-CD-01-00-02</P>
                   <P type="APPID">0002</P>
                </Address>
-               <MinTime multiplier="m" unit="s">250</MinTime>
+               <MinTime unit="s" multiplier="m">250</MinTime>
             </GSE>
          </ConnectedAP>
-         <ConnectedAP apName="AP_PC" iedName="IED_PC">
+         <ConnectedAP iedName="IED_PC" apName="AP_PC">
             <Address>
                <P type="IP">127.0.0.1</P>
                <P type="IP-SUBNET">255.255.255.0</P>
                <P type="IP-GATEWAY">127.0.0.1</P>
                <P type="MAC-Address">00-00-00-00-00-01</P>
             </Address>
-            <GSE cbName="CB_FROM_PC" ldInst="LD_PC">
+            <GSE ldInst="LD_PC" cbName="CB_FROM_PC">
                <Address>
                   <P type="MAC-Address">01-0C-CD-01-00-01</P>
                   <P type="APPID">0003</P>
                </Address>
-               <MinTime multiplier="m" unit="s">250</MinTime>
-               <MaxTime multiplier="m" unit="s">2000</MaxTime>
+               <MinTime unit="s" multiplier="m">250</MinTime>
+               <MaxTime unit="s" multiplier="m">2000</MaxTime>
             </GSE>
-            <GSE cbName="CB_TO_PC" ldInst="LD_RTLAB">
+            <GSE ldInst="LD_RTLAB" cbName="CB_TO_PC">
                <Address>
                   <P type="MAC-Address">01-0C-CD-01-00-01</P>
                   <P type="APPID">0004</P>
                </Address>
-               <MinTime multiplier="m" unit="s">250</MinTime>
+               <MinTime unit="s" multiplier="m">250</MinTime>
             </GSE>
          </ConnectedAP>
       </SubNetwork>
    </Communication>
-   <IED manufacturer="Aalborg U" name="IED_PC" type="RTUType">
+   <IED type="RTUType" manufacturer="Aalborg U" name="IED_PC">
       <Services/>
       <AccessPoint name="AP_PC">
          <Server timeout="30">
             <Authentication/>
             <LDevice inst="LD_PC">
-               <LN0 inst="" lnClass="LLN0" lnType="LLN0_0">
+               <LN0 lnClass="LLN0" inst="" lnType="LLN0_0">
                   <DataSet name="DS_PC">
-                     <FCDA daName="stVal" doName="ISCSO" fc="ST" ldInst="LD_PC" lnClass="GGIO" lnInst="1"/>
-                     <FCDA daName="stVal" doName="ISCSO" fc="ST" ldInst="LD_PC" lnClass="GGIO" lnInst="2"/>
-                     <FCDA daName="stVal" doName="ISCSO" fc="ST" ldInst="LD_PC" lnClass="GGIO" lnInst="3"/>
-                     <FCDA daName="stVal" doName="ISCSO" fc="ST" ldInst="LD_PC" lnClass="GGIO" lnInst="4"/>
+                     <FCDA ldInst="LD_PC" lnClass="GGIO" lnInst="1" doName="ISCSO" daName="stVal" fc="ST"/>
+                     <FCDA ldInst="LD_PC" lnClass="GGIO" lnInst="2" doName="ISCSO" daName="stVal" fc="ST"/>
+                     <FCDA ldInst="LD_PC" lnClass="GGIO" lnInst="3" doName="ISCSO" daName="stVal" fc="ST"/>
+                     <FCDA ldInst="LD_PC" lnClass="GGIO" lnInst="4" doName="ISCSO" daName="stVal" fc="ST"/>
+                     <FCDA ldInst="LD_PC" lnClass="GGIO" lnInst="5" doName="SPCSO" daName="stVal" fc="ST"/>
                   </DataSet>
-                  <GSEControl appID="GSE_APPID_FROM_PC" confRev="1" datSet="DS_PC" name="CB_FROM_PC" type="GOOSE"/>
+                  <GSEControl type="GOOSE" appID="GSE_APPID_FROM_PC" confRev="1" datSet="DS_PC" name="CB_FROM_PC"/>
                </LN0>
-               <LN inst="1" lnClass="GGIO" lnType="GGIO_0" prefix="">
+               <LN lnClass="GGIO" inst="1" prefix="" lnType="GGIO_0">
                   <DOI name="ISCSO">
                      <DAI name="stVal">
                         <Private type="IEC_60870_5_104">
@@ -97,7 +80,7 @@ along with jgoose.  If not, see <http://www.gnu.org/licenses/>.
                      </DAI>
                   </DOI>
                </LN>
-               <LN inst="2" lnClass="GGIO" lnType="GGIO_0" prefix="">
+               <LN lnClass="GGIO" inst="2" prefix="" lnType="GGIO_0">
                   <DOI name="ISCSO">
                      <DAI name="stVal">
                         <Private type="IEC_60870_5_104">
@@ -106,7 +89,7 @@ along with jgoose.  If not, see <http://www.gnu.org/licenses/>.
                      </DAI>
                   </DOI>
                </LN>
-               <LN inst="3" lnClass="GGIO" lnType="GGIO_0" prefix="">
+               <LN lnClass="GGIO" inst="3" prefix="" lnType="GGIO_0">
                   <DOI name="ISCSO">
                      <DAI name="stVal">
                         <Private type="IEC_60870_5_104">
@@ -115,27 +98,36 @@ along with jgoose.  If not, see <http://www.gnu.org/licenses/>.
                      </DAI>
                   </DOI>
                </LN>
-               <LN inst="4" lnClass="GGIO" lnType="GGIO_0" prefix="">
+               <LN lnClass="GGIO" inst="4" prefix="" lnType="GGIO_0">
                   <DOI name="ISCSO">
                      <DAI name="stVal">
                         <Private type="IEC_60870_5_104">
-                           <IEC_60870_5_104:GlobalAddress104 xmlns:IEC_60870_5_104="http://www.iec.ch/61850-80-1/2007/SCL" casdu="1" ioa="4" ti="9"/>
-                        </Private>
+						    <IEC_60870_5_104:GlobalAddress104 xmlns:IEC_60870_5_104="http://www.iec.ch/61850-80-1/2007/SCL" casdu="1" ioa="4" ti="9"/>
+						</Private>
+                     </DAI>
+                  </DOI>
+               </LN>
+               <LN lnClass="GGIO" inst="5" prefix="" lnType="GGIO_1">
+                  <DOI name="SPCSO">
+                     <DAI name="stVal">
+                        <Private type="IEC_60870_5_104">
+							<IEC_60870_5_104:GlobalAddress104 xmlns:IEC_60870_5_104="http://www.iec.ch/61850-80-1/2007/SCL" casdu="1" ioa="5" ti="9"/>
+						</Private>
                      </DAI>
                   </DOI>
                </LN>
             </LDevice>
             <LDevice inst="LD_RTLAB">
-               <LN0 inst="" lnClass="LLN0" lnType="LLN0_0">
+               <LN0 lnClass="LLN0" inst="" lnType="LLN0_0">
                   <DataSet name="DS_RTLAB">
-                     <FCDA daName="stVal" doName="ISCSO" fc="ST" ldInst="LD_RTLAB" lnClass="GGIO" lnInst="1"/>
-                     <FCDA daName="stVal" doName="ISCSO" fc="ST" ldInst="LD_RTLAB" lnClass="GGIO" lnInst="2"/>
-                     <FCDA daName="stVal" doName="ISCSO" fc="ST" ldInst="LD_RTLAB" lnClass="GGIO" lnInst="3"/>
-                     <FCDA daName="stVal" doName="ISCSO" fc="ST" ldInst="LD_RTLAB" lnClass="GGIO" lnInst="4"/>
+                     <FCDA ldInst="LD_RTLAB" lnClass="GGIO" lnInst="1" doName="ISCSO" daName="stVal" fc="ST"/>
+                     <FCDA ldInst="LD_RTLAB" lnClass="GGIO" lnInst="2" doName="ISCSO" daName="stVal" fc="ST"/>
+                     <FCDA ldInst="LD_RTLAB" lnClass="GGIO" lnInst="3" doName="ISCSO" daName="stVal" fc="ST"/>
+                     <FCDA ldInst="LD_RTLAB" lnClass="GGIO" lnInst="4" doName="ISCSO" daName="stVal" fc="ST"/>
                   </DataSet>
-                  <GSEControl appID="GSE_APPID_TO_PC" confRev="1" datSet="DS_RTLAB" name="CB_TO_PC" type="GOOSE"/>
+                  <GSEControl type="GOOSE" appID="GSE_APPID_TO_PC" confRev="1" datSet="DS_RTLAB" name="CB_TO_PC"/>
                </LN0>
-               <LN inst="1" lnClass="GGIO" lnType="GGIO_0" prefix="">
+               <LN lnClass="GGIO" inst="1" prefix="" lnType="GGIO_0">
                   <DOI name="ISCSO">
                      <DAI name="stVal">
                         <Private type="IEC_60870_5_104">
@@ -144,7 +136,7 @@ along with jgoose.  If not, see <http://www.gnu.org/licenses/>.
                      </DAI>
                   </DOI>
                </LN>
-               <LN inst="2" lnClass="GGIO" lnType="GGIO_0" prefix="">
+               <LN lnClass="GGIO" inst="2" prefix="" lnType="GGIO_0">
                   <DOI name="ISCSO">
                      <DAI name="stVal">
                         <Private type="IEC_60870_5_104">
@@ -153,7 +145,7 @@ along with jgoose.  If not, see <http://www.gnu.org/licenses/>.
                      </DAI>
                   </DOI>
                </LN>
-               <LN inst="3" lnClass="GGIO" lnType="GGIO_0" prefix="">
+               <LN lnClass="GGIO" inst="3" prefix="" lnType="GGIO_0">
                   <DOI name="ISCSO">
                      <DAI name="stVal">
                         <Private type="IEC_60870_5_104">
@@ -162,7 +154,7 @@ along with jgoose.  If not, see <http://www.gnu.org/licenses/>.
                      </DAI>
                   </DOI>
                </LN>
-               <LN inst="4" lnClass="GGIO" lnType="GGIO_0" prefix="">
+               <LN lnClass="GGIO" inst="4" prefix="" lnType="GGIO_0">
                   <DOI name="ISCSO">
                      <DAI name="stVal">
                         <Private type="IEC_60870_5_104">
@@ -175,143 +167,94 @@ along with jgoose.  If not, see <http://www.gnu.org/licenses/>.
          </Server>
       </AccessPoint>
    </IED>
-   <IED manufacturer="Aalborg U" name="IED_RTLAB" type="RTUType">
+   <IED type="RTUType" manufacturer="Aalborg U" name="IED_RTLAB">
       <Services/>
       <AccessPoint name="AP_RTLAB">
          <Server timeout="30">
             <Authentication/>
             <LDevice inst="LD_RTLAB">
-               <LN0 inst="" lnClass="LLN0" lnType="LLN0_0">
+               <LN0 lnClass="LLN0" inst="" lnType="LLN0_0">
                   <DataSet name="DS_RTLAB">
-                     <FCDA daName="stVal" doName="ISCSO" fc="ST" ldInst="LD_RTLAB" lnClass="GGIO" lnInst="1"/>
-                     <FCDA daName="stVal" doName="ISCSO" fc="ST" ldInst="LD_RTLAB" lnClass="GGIO" lnInst="2"/>
-                     <FCDA daName="stVal" doName="ISCSO" fc="ST" ldInst="LD_RTLAB" lnClass="GGIO" lnInst="3"/>
-                     <FCDA daName="stVal" doName="ISCSO" fc="ST" ldInst="LD_RTLAB" lnClass="GGIO" lnInst="4"/>
+                     <FCDA ldInst="LD_RTLAB" lnClass="GGIO" lnInst="1" doName="ISCSO" daName="stVal" fc="ST"/>
+                     <FCDA ldInst="LD_RTLAB" lnClass="GGIO" lnInst="2" doName="ISCSO" daName="stVal" fc="ST"/>
+                     <FCDA ldInst="LD_RTLAB" lnClass="GGIO" lnInst="3" doName="ISCSO" daName="stVal" fc="ST"/>
+                     <FCDA ldInst="LD_RTLAB" lnClass="GGIO" lnInst="4" doName="ISCSO" daName="stVal" fc="ST"/>
                   </DataSet>
-                  <GSEControl appID="GSE_APPID_FROM_RTLAB" confRev="1" datSet="DS_RTLAB" name="CB_FROM_RTLAB" type="GOOSE"/>
+                  <GSEControl type="GOOSE" appID="GSE_APPID_FROM_RTLAB" confRev="1" datSet="DS_RTLAB" name="CB_FROM_RTLAB"/>
                </LN0>
-               <LN inst="1" lnClass="GGIO" lnType="GGIO_0" prefix="">
-                  <DOI name="ISCSO">
-                     <DAI name="stVal">
-                        <Private type="IEC_60870_5_104">
-                           <IEC_60870_5_104:GlobalAddress104 xmlns:IEC_60870_5_104="http://www.iec.ch/61850-80-1/2007/SCL" casdu="2" ioa="1" ti="9"/>
-                        </Private>
-                     </DAI>
-                  </DOI>
-               </LN>
-               <LN inst="2" lnClass="GGIO" lnType="GGIO_0" prefix="">
-                  <DOI name="ISCSO">
-                     <DAI name="stVal">
-                        <Private type="IEC_60870_5_104">
-                           <IEC_60870_5_104:GlobalAddress104 xmlns:IEC_60870_5_104="http://www.iec.ch/61850-80-1/2007/SCL" casdu="2" ioa="2" ti="9"/>
-                        </Private>
-                     </DAI>
-                  </DOI>
-               </LN>
-               <LN inst="3" lnClass="GGIO" lnType="GGIO_0" prefix="">
-                  <DOI name="ISCSO">
-                     <DAI name="stVal">
-                        <Private type="IEC_60870_5_104">
-                           <IEC_60870_5_104:GlobalAddress104 xmlns:IEC_60870_5_104="http://www.iec.ch/61850-80-1/2007/SCL" casdu="2" ioa="3" ti="9"/>
-                        </Private>
-                     </DAI>
-                  </DOI>
-               </LN>
-               <LN inst="4" lnClass="GGIO" lnType="GGIO_0" prefix="">
-                  <DOI name="ISCSO">
-                     <DAI name="stVal">
-                        <Private type="IEC_60870_5_104">
-                           <IEC_60870_5_104:GlobalAddress104 xmlns:IEC_60870_5_104="http://www.iec.ch/61850-80-1/2007/SCL" casdu="2" ioa="4" ti="9"/>
-                        </Private>
-                     </DAI>
-                  </DOI>
-               </LN>
+               <LN lnClass="GGIO" inst="1" prefix="" lnType="GGIO_0"/>
+               <LN lnClass="GGIO" inst="2" prefix="" lnType="GGIO_0"/>
+               <LN lnClass="GGIO" inst="3" prefix="" lnType="GGIO_0"/>
+               <LN lnClass="GGIO" inst="4" prefix="" lnType="GGIO_0"/>
             </LDevice>
             <LDevice inst="LD_PC">
-               <LN0 inst="" lnClass="LLN0" lnType="LLN0_0">
+               <LN0 lnClass="LLN0" inst="" lnType="LLN0_0">
                   <DataSet name="DS_PC">
-                     <FCDA daName="stVal" doName="ISCSO" fc="ST" ldInst="LD_PC" lnClass="GGIO" lnInst="1"/>
-                     <FCDA daName="stVal" doName="ISCSO" fc="ST" ldInst="LD_PC" lnClass="GGIO" lnInst="2"/>
-                     <FCDA daName="stVal" doName="ISCSO" fc="ST" ldInst="LD_PC" lnClass="GGIO" lnInst="3"/>
-                     <FCDA daName="stVal" doName="ISCSO" fc="ST" ldInst="LD_PC" lnClass="GGIO" lnInst="4"/>
+                     <FCDA ldInst="LD_PC" lnClass="GGIO" lnInst="1" doName="ISCSO" daName="stVal" fc="ST"/>
+                     <FCDA ldInst="LD_PC" lnClass="GGIO" lnInst="2" doName="ISCSO" daName="stVal" fc="ST"/>
+                     <FCDA ldInst="LD_PC" lnClass="GGIO" lnInst="3" doName="ISCSO" daName="stVal" fc="ST"/>
+                     <FCDA ldInst="LD_PC" lnClass="GGIO" lnInst="4" doName="ISCSO" daName="stVal" fc="ST"/>
+                     <FCDA ldInst="LD_PC" lnClass="GGIO" lnInst="5" doName="SPCSO" daName="stVal" fc="ST"/>
                   </DataSet>
-                  <GSEControl appID="GSE_APPID_TO_RTLAB" confRev="1" datSet="DS_PC" name="CB_TO_RTLAB" type="GOOSE"/>
+                  <GSEControl type="GOOSE" appID="GSE_APPID_TO_RTLAB" confRev="1" datSet="DS_PC" name="CB_TO_RTLAB"/>
                </LN0>
-               <LN inst="1" lnClass="GGIO" lnType="GGIO_0" prefix="">
-                  <DOI name="ISCSO">
-                     <DAI name="stVal">
-                        <Private type="IEC_60870_5_104">
-                           <IEC_60870_5_104:GlobalAddress104 xmlns:IEC_60870_5_104="http://www.iec.ch/61850-80-1/2007/SCL" casdu="1" ioa="1" ti="9"/>
-                        </Private>
-                     </DAI>
-                  </DOI>
-               </LN>
-               <LN inst="2" lnClass="GGIO" lnType="GGIO_0" prefix="">
-                  <DOI name="ISCSO">
-                     <DAI name="stVal">
-                        <Private type="IEC_60870_5_104">
-                           <IEC_60870_5_104:GlobalAddress104 xmlns:IEC_60870_5_104="http://www.iec.ch/61850-80-1/2007/SCL" casdu="1" ioa="2" ti="9"/>
-                        </Private>
-                     </DAI>
-                  </DOI>
-               </LN>
-               <LN inst="3" lnClass="GGIO" lnType="GGIO_0" prefix="">
-                  <DOI name="ISCSO">
-                     <DAI name="stVal">
-                        <Private type="IEC_60870_5_104">
-                           <IEC_60870_5_104:GlobalAddress104 xmlns:IEC_60870_5_104="http://www.iec.ch/61850-80-1/2007/SCL" casdu="1" ioa="3" ti="9"/>
-                        </Private>
-                     </DAI>
-                  </DOI>
-               </LN>
-               <LN inst="4" lnClass="GGIO" lnType="GGIO_0" prefix="">
-                  <DOI name="ISCSO">
-                     <DAI name="stVal">
-                        <Private type="IEC_60870_5_104">
-                           <IEC_60870_5_104:GlobalAddress104 xmlns:IEC_60870_5_104="http://www.iec.ch/61850-80-1/2007/SCL" casdu="1" ioa="4" ti="9"/>
-                        </Private>
-                     </DAI>
-                  </DOI>
-               </LN>
+               <LN lnClass="GGIO" inst="1" prefix="" lnType="GGIO_0"/>
+               <LN lnClass="GGIO" inst="2" prefix="" lnType="GGIO_0"/>
+               <LN lnClass="GGIO" inst="3" prefix="" lnType="GGIO_0"/>
+               <LN lnClass="GGIO" inst="4" prefix="" lnType="GGIO_0"/>
+               <LN lnClass="GGIO" inst="5" prefix="" lnType="GGIO_1"/>
             </LDevice>
          </Server>
       </AccessPoint>
    </IED>
    <DataTypeTemplates>
-      <LNodeType id="GGIO_0" lnClass="GGIO">
+      <LNodeType lnClass="GGIO" id="GGIO_0">
          <DO name="Mod" type="ENC_0"/>
          <DO name="Beh" type="INS_0"/>
          <DO name="Health" type="INS_0"/>
          <DO name="NamPlt" type="LPL_0"/>
          <DO name="ISCSO" type="INC_0"/>
       </LNodeType>
-      <LNodeType id="LLN0_0" lnClass="LLN0">
+      <LNodeType lnClass="LLN0" id="LLN0_0">
          <DO name="Mod" type="ENC_0"/>
          <DO name="Beh" type="INS_0"/>
          <DO name="Health" type="INS_0"/>
          <DO name="NamPlt" type="LPL_0"/>
       </LNodeType>
+      <LNodeType lnClass="GGIO" id="GGIO_1">
+         <DO name="Mod" type="ENC_0"/>
+         <DO name="Beh" type="INS_0"/>
+         <DO name="Health" type="INS_0"/>
+         <DO name="NamPlt" type="LPL_0"/>
+         <DO name="SPCSO" type="SPC_0"/>
+      </LNodeType>
       <DOType cdc="INC" id="INC_0">
-         <DA bType="INT32" dchg="true" fc="ST" name="stVal"/>
-         <DA bType="Quality" fc="ST" name="q" qchg="true"/>
-         <DA bType="Timestamp" fc="ST" name="t"/>
-         <DA bType="Enum" fc="CF" name="ctlModel" type="ctlModel"/>
+         <DA dchg="true" fc="ST" name="stVal" bType="INT32"/>
+         <DA qchg="true" fc="ST" name="q" bType="Quality"/>
+         <DA fc="ST" name="t" bType="Timestamp"/>
+         <DA fc="CF" name="ctlModel" bType="Enum" type="ctlModel"/>
       </DOType>
       <DOType cdc="LPL" id="LPL_0">
-         <DA bType="VisString255" fc="DC" name="vendor"/>
-         <DA bType="VisString255" fc="DC" name="swRev"/>
-         <DA bType="VisString255" fc="DC" name="d"/>
+         <DA fc="DC" name="vendor" bType="VisString255"/>
+         <DA fc="DC" name="swRev" bType="VisString255"/>
+         <DA fc="DC" name="d" bType="VisString255"/>
       </DOType>
       <DOType cdc="INS" id="INS_0">
-         <DA bType="Enum" dchg="true" fc="ST" name="stVal" type="Mod"/>
-         <DA bType="Quality" fc="ST" name="q" qchg="true"/>
-         <DA bType="Timestamp" fc="ST" name="t"/>
+         <DA dchg="true" fc="ST" name="stVal" bType="Enum" type="Mod"/>
+         <DA qchg="true" fc="ST" name="q" bType="Quality"/>
+         <DA fc="ST" name="t" bType="Timestamp"/>
       </DOType>
       <DOType cdc="ENC" id="ENC_0">
-         <DA bType="Enum" dchg="true" fc="ST" name="stVal" type="Mod"/>
-         <DA bType="Quality" fc="ST" name="q" qchg="true"/>
-         <DA bType="Timestamp" fc="ST" name="t"/>
-         <DA bType="Enum" dchg="true" fc="CF" name="ctlModel" type="ctlModel"/>
+         <DA dchg="true" fc="ST" name="stVal" bType="Enum" type="Mod"/>
+         <DA qchg="true" fc="ST" name="q" bType="Quality"/>
+         <DA fc="ST" name="t" bType="Timestamp"/>
+         <DA dchg="true" fc="CF" name="ctlModel" bType="Enum" type="ctlModel"/>
+      </DOType>
+      <DOType cdc="SPC" id="SPC_0" desc="Controllable single point">
+         <DA dchg="true" fc="ST" name="stVal" bType="FLOAT32"/>
+         <DA qchg="true" fc="ST" name="q" bType="Quality"/>
+         <DA fc="ST" name="t" bType="Timestamp"/>
+         <DA fc="CF" name="ctlModel" bType="Enum" type="ctlModel"/>
       </DOType>
       <EnumType id="ctlModel">
          <EnumVal ord="0">status-only</EnumVal>

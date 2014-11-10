@@ -123,6 +123,9 @@ public class jgoose_demo {
             
             Integer tx_GGIO_4_ISCSO_stVal; // casdu = 1; ioa = 4; ti = 9;
             final String tx_GGIO_4_ISCSO_stVal_KEY = "1.4.9";
+            
+            Float tx_GGIO_5_SPCSO_stVal; // casdu = 1; ioa = 5; ti = 9;
+            final String tx_GGIO_5_SPCSO_stVal_KEY = "1.5.9";
         	
             boolean tx_testFlag;
             
@@ -153,7 +156,8 @@ public class jgoose_demo {
         exchangedData.tx_GGIO_1_ISCSO_stVal = 101;
         exchangedData.tx_GGIO_2_ISCSO_stVal = 102; 
         exchangedData.tx_GGIO_3_ISCSO_stVal = 103; 
-        exchangedData.tx_GGIO_4_ISCSO_stVal = 104; 
+        exchangedData.tx_GGIO_4_ISCSO_stVal = 104;
+        exchangedData.tx_GGIO_5_SPCSO_stVal = 1001.5678f;
         exchangedData.tx_testFlag = false;
 
         
@@ -358,6 +362,9 @@ public class jgoose_demo {
 					
 					gooseFrame.setValueByKey(exchangedData.tx_GGIO_4_ISCSO_stVal_KEY, 
 							exchangedData.tx_GGIO_4_ISCSO_stVal);
+					
+					gooseFrame.setValueByKey(exchangedData.tx_GGIO_5_SPCSO_stVal_KEY, 
+							exchangedData.tx_GGIO_5_SPCSO_stVal);
 				
 				} 
 				catch (IEC61850_GOOSE_Exception e) 
@@ -447,7 +454,8 @@ public class jgoose_demo {
 		exchangedData.tx_GGIO_1_ISCSO_stVal = 201;
         exchangedData.tx_GGIO_2_ISCSO_stVal = 202; 
         exchangedData.tx_GGIO_3_ISCSO_stVal = 203; 
-        exchangedData.tx_GGIO_4_ISCSO_stVal = 204; 
+        exchangedData.tx_GGIO_4_ISCSO_stVal = 204;
+        exchangedData.tx_GGIO_5_SPCSO_stVal = 2002.5678f; 
         exchangedData.tx_testFlag = false;
 		
         // We trigger a second transmit event
@@ -466,7 +474,8 @@ public class jgoose_demo {
 		exchangedData.tx_GGIO_1_ISCSO_stVal = 301;
         exchangedData.tx_GGIO_2_ISCSO_stVal = 302; 
         exchangedData.tx_GGIO_3_ISCSO_stVal = 303; 
-        exchangedData.tx_GGIO_4_ISCSO_stVal = 304; 
+        exchangedData.tx_GGIO_4_ISCSO_stVal = 304;
+        exchangedData.tx_GGIO_5_SPCSO_stVal = 3003.5678f; 
         exchangedData.tx_testFlag = false;
         
         // TODO test it
@@ -489,7 +498,8 @@ public class jgoose_demo {
 		exchangedData.tx_GGIO_1_ISCSO_stVal = 401;
         exchangedData.tx_GGIO_2_ISCSO_stVal = 402; 
         exchangedData.tx_GGIO_3_ISCSO_stVal = 403; 
-        exchangedData.tx_GGIO_4_ISCSO_stVal = 404; 
+        exchangedData.tx_GGIO_4_ISCSO_stVal = 404;
+        exchangedData.tx_GGIO_5_SPCSO_stVal = 4004.5678f; 
         exchangedData.tx_testFlag = false;
 		
         // We trigger a second transmit event
@@ -508,7 +518,8 @@ public class jgoose_demo {
 		exchangedData.tx_GGIO_1_ISCSO_stVal = 1001;
         exchangedData.tx_GGIO_2_ISCSO_stVal = 1002; 
         exchangedData.tx_GGIO_3_ISCSO_stVal = 1003; 
-        exchangedData.tx_GGIO_4_ISCSO_stVal = 1004; 
+        exchangedData.tx_GGIO_4_ISCSO_stVal = 1004;
+        exchangedData.tx_GGIO_5_SPCSO_stVal = 11001.5678f; 
         exchangedData.tx_testFlag = false;
         
         // TODO test disable event

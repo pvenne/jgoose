@@ -20,7 +20,7 @@
  * This class is used to decode an ICD file.
  * 
  * @author  Philippe Venne
- * @version 0.2
+ * @version 0.3
  *
  */
 
@@ -383,21 +383,102 @@ public class IEC61850_GOOSE_ICD_file {
 						
 			boolean found_NodeType = false;
 			
+			/*
+			 * Now we have to extract the lnType using the lnClass and the inst number
+			 */
+			
+			boolean found_LDevice = false;
+			
+			// Retrieves all elements named "LDevice" within the SCL file
+			elementFilter = new ElementFilter("LDevice");
+			
+			// Search for a LDevice block with name matching ldInstance in the IED section
+			for(Iterator<Element> LDevice_IT = IED_section.getDescendants(elementFilter); LDevice_IT.hasNext();)	
+			{
+				Element current_element = LDevice_IT.next();
+				
+				// We found one matching element
+				if(current_element.getAttributeValue("inst").equals(ldInstance))
+				{
+					// Something is wrong, its the second time we find a LDevice block with a matching name
+					if (found_LDevice == true)
+						throw new IEC61850_GOOSE_Exception("There is more than one <LDevice> block named:" + ldInstance + " in the SCL file");
+					else
+						found_LDevice = true;
+					
+					boolean found_IECData = false;
+					
+					// Retrieves all elements named "LN" within IED node
+					elementFilter = new ElementFilter("LN");
+					
+					// Search for a LN block with a matching lnClass and inst prefix
+					for (Iterator<Element> LN_IT = current_element.getDescendants(elementFilter); LN_IT.hasNext();)
+					{
+						Element innerloop_element = LN_IT.next();
+						
+						if(innerloop_element.getAttributeValue("lnClass").equals(current_GOOSESignal.lnClass) &&
+							innerloop_element.getAttributeValue("inst").equals(String.valueOf(current_GOOSESignal.lnInst)))
+						{
+							/*
+							 *  We found the right LN node. We save the lnType
+							 */
+							current_GOOSESignal.lnType_id = innerloop_element.getAttributeValue("lnType");
+							
+							Element DOI_element = innerloop_element.getChild("DOI", root_namespace);
+							
+							if(DOI_element.getAttributeValue("name").equals(current_GOOSESignal.doName))
+							{
+								Element DAI_element = DOI_element.getChild("DAI", root_namespace);
+								
+								if(DAI_element.getAttributeValue("name").equals(current_GOOSESignal.daName))
+								{
+									Element Private_element = DAI_element.getChild("Private", root_namespace);
+									
+									/* 
+									 * Save IEC 60870-5-104 data for every signal
+									 */
+									
+									if(Private_element.getAttributeValue("type").contentEquals("IEC_60870_5_104"))
+									{
+										Namespace iec_60870_5_104_namespace = Namespace.getNamespace("IEC_60870_5_104", "http://www.iec.ch/61850-80-1/2007/SCL");
+										Element IEC_element = Private_element.getChild("GlobalAddress104", iec_60870_5_104_namespace);
+										
+										current_GOOSESignal.casdu =  Integer.parseInt(IEC_element.getAttributeValue("casdu"));
+										current_GOOSESignal.ioa = Integer.parseInt(IEC_element.getAttributeValue("ioa"));
+										current_GOOSESignal.ti = Integer.parseInt(IEC_element.getAttributeValue("ti"));
+										
+										found_IECData = true;
+									}
+								}
+							}
+							
+						}
+						
+					}
+					
+					if (found_IECData == false)
+						throw new IEC61850_GOOSE_Exception("<LN> block with corresponding lnClass, inst, lnType, DOI name"+
+								"and  DAI name not found in <IED> for signal " + String.valueOf(position+1)); 
+				}
+			}
+			
+			if (found_LDevice == false)
+				throw new IEC61850_GOOSE_Exception("There is no <LDevice> block named:" + ldInstance + " in the SCL file");
+
 			// Retrieve Node DataTypeTemplates
 			Element dataTypeTemplate_element = xml_document.getRootElement().getChild("DataTypeTemplates", root_namespace);
 			
 			// Retrieves all elements named "LNodeType" within DataTypeTemplates node
 			elementFilter = new ElementFilter("LNodeType");
 			
-			// Search for a LNodeType block with a matching lnClass
+			// Search for a LNodeType block with a matching lnClass and id
 			for (Iterator<Element> LNodeType_IT = dataTypeTemplate_element.getDescendants(elementFilter); LNodeType_IT.hasNext();)
 			{
 				Element current_element = LNodeType_IT.next();
 				
-				if(current_element.getAttributeValue("lnClass").equals(current_GOOSESignal.lnClass))
+				if(current_element.getAttributeValue("lnClass").equals(current_GOOSESignal.lnClass) &&
+						current_element.getAttributeValue("id").equals(String.valueOf(current_GOOSESignal.lnType_id)))
 				{
-					current_GOOSESignal.lnType_id = current_element.getAttributeValue("id");
-					
 					// Walks all DO nodes
 					List<Element> do_nodes_LIST = current_element.getChildren("DO", root_namespace);
 					
@@ -454,84 +535,6 @@ public class IEC61850_GOOSE_ICD_file {
 			if (found_NodebType == false)
 				throw new IEC61850_GOOSE_Exception("<DA> node within <DOType> block with corresponding fc, name,"+
 						"  and id not found in <DataTypeTemplates> for signal " + String.valueOf(position+1));
-			
-			
-			
-			/* 
-			 * Save IEC 60870-5-104 data for every signal
-			 */
-			
-			boolean found_LDevice = false;
-			
-			// Retrieves all elements named "LDevice" within the SCL file
-			elementFilter = new ElementFilter("LDevice");
-			
-			// Search for a LDevice block with name matching ldInstance in the IED section
-			for(Iterator<Element> LDevice_IT = IED_section.getDescendants(elementFilter); LDevice_IT.hasNext();)	
-			{
-				Element current_element = LDevice_IT.next();
-				
-				// We found one matching element
-				if(current_element.getAttributeValue("inst").equals(ldInstance))
-				{
-					// Something is wrong, its the second time we find a LDevice block with a matching name
-					if (found_LDevice == true)
-						throw new IEC61850_GOOSE_Exception("There is more than one <LDevice> block named:" + ldInstance + " in the SCL file");
-					else
-						found_LDevice = true;
-					
-					boolean found_IECData = false;
-					
-					// Retrieves all elements named "LN" within IED node
-					elementFilter = new ElementFilter("LN");
-					
-					// Search for a LN block with a matching lnClass, inst prefix and lnType
-					for (Iterator<Element> LN_IT = current_element.getDescendants(elementFilter); LN_IT.hasNext();)
-					{
-
-						//Element current_element = LN_IT.next();
-						Element innerloop_element = LN_IT.next();
-						
-						if(innerloop_element.getAttributeValue("lnClass").equals(current_GOOSESignal.lnClass) &&
-							innerloop_element.getAttributeValue("inst").equals(String.valueOf(current_GOOSESignal.lnInst)) &&
-							innerloop_element.getAttributeValue("lnType").equals(current_GOOSESignal.lnType_id))
-						{
-							Element DOI_element = innerloop_element.getChild("DOI", root_namespace);
-							
-							if(DOI_element.getAttributeValue("name").equals(current_GOOSESignal.doName))
-							{
-								Element DAI_element = DOI_element.getChild("DAI", root_namespace);
-								
-								if(DAI_element.getAttributeValue("name").equals(current_GOOSESignal.daName))
-								{
-									Element Private_element = DAI_element.getChild("Private", root_namespace);
-									
-									if(Private_element.getAttributeValue("type").contentEquals("IEC_60870_5_104"))
-									{
-										Namespace iec_60870_5_104_namespace = Namespace.getNamespace("IEC_60870_5_104", "http://www.iec.ch/61850-80-1/2007/SCL");
-										Element IEC_element = Private_element.getChild("GlobalAddress104", iec_60870_5_104_namespace);
-										
-										current_GOOSESignal.casdu =  Integer.parseInt(IEC_element.getAttributeValue("casdu"));
-										current_GOOSESignal.ioa = Integer.parseInt(IEC_element.getAttributeValue("ioa"));
-										current_GOOSESignal.ti = Integer.parseInt(IEC_element.getAttributeValue("ti"));
-										
-										found_IECData = true;
-									}
-								}
-							}
-							
-						}
-						
-					}
-					
-					if (found_IECData == false)
-						throw new IEC61850_GOOSE_Exception("<LN> block with corresponding lnClass, inst, lnType, DOI name"+
-								"and  DAI name not found in <IED> for signal " + String.valueOf(position+1)); 
-				}
-			}
-			
-			if (found_LDevice == false)
-				throw new IEC61850_GOOSE_Exception("There is no <LDevice> block named:" + ldInstance + " in the SCL file");
 		}
 		
 		return;

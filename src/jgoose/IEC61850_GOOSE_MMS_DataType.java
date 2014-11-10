@@ -21,7 +21,7 @@
  * It related the MMS Datatype with the IEC61850 type Tag and the IEC Datatype
  * 
  * @author  Philippe Venne
- * @version 0.1
+ * @version 0.2
  *
  */
 
@@ -36,14 +36,14 @@ import java.util.Map;
 
 public enum IEC61850_GOOSE_MMS_DataType
 {
-	 // MMS Datatype    Tag     IEC Datatype
+	 // MMS Datatype    Tag     IEC Datatype, Byte size
 	 array				(0xa1),
-	 structure			(0xa2,	"Struct"),
-	 booln				(0x83,	"BOOLEAN"),
-	 bit_string			(0x84,	"Quality", 	"Timestamp"),
-	 integer			(0x85,	"INT16", 	"INT32", 	"INT8", 	"Enum"),
-	 unsign				(0x86,	"INT8U", 	"INT16U", 	"INT32U"),
-	 float_point		(0x87,	"FLOAT64", 	"FLOAT32"),
+	 structure			(0xa2,	"Struct", 	"0"),
+	 booln				(0x83,	"BOOLEAN", 	"1"),
+	 bit_string			(0x84,	"Quality", 	"0",	"Timestamp","0"),
+	 integer			(0x85,	"INT16", 	"2",	"INT32",	"4", 	"INT8",		"1",	"Enum",	"1"),
+	 unsign				(0x86,	"INT8U", 	"1", 	"INT16U", 	"2", 	"INT32U", 	"4"),
+	 float_point		(0x87,	"FLOAT64",	"8", 	"FLOAT32", 	"4"),
 	 octet_string		(0x89),
 	 visible_string		(0x8a),
 	 generalized_time	(0x8b),
@@ -51,13 +51,16 @@ public enum IEC61850_GOOSE_MMS_DataType
 	 bcd				(0x8d),
 	 boolean_array		(0x8e),
 	 obj_id				(0x8f),
-	 utc_time			(0x91,	"Timestamp");
+	 utc_time			(0x91,	"Timestamp","0");
 	 
 	 // Holds the tag for each value of the enumeration 
 	 public final int tag;
 	 
-	 // Holds the tag for each value of the enumeration 
+	 // Holds the IEC_Datatype for each value of the enumeration 
 	 public final List<String> iec_list = new ArrayList<String>();
+	 
+	 // Holds the pairs of Byte size and IEC Datatype
+	 public final Map<String,Integer> iec_size = new HashMap<String,Integer>();
 	 
 	 // This Map holds each Integer MMS_DataType pair
 	 private static final Map<Integer,IEC61850_GOOSE_MMS_DataType> tag_lookup 
@@ -66,6 +69,10 @@ public enum IEC61850_GOOSE_MMS_DataType
      // This Map holds each MMS_DataType iec_list pair
      private static final Map<IEC61850_GOOSE_MMS_DataType, List<String>> iec_lookup 
      = new HashMap<IEC61850_GOOSE_MMS_DataType, List<String>>();
+     
+     // This map hold each size and IEC data type pair
+     private static final Map<String,Integer> iec_size_lookup 
+     = new HashMap<String,Integer>();
      
      static 
      {
@@ -76,6 +83,10 @@ public enum IEC61850_GOOSE_MMS_DataType
          // Populates the map
          for(IEC61850_GOOSE_MMS_DataType t : EnumSet.allOf(IEC61850_GOOSE_MMS_DataType.class))
         	 iec_lookup.put(t, t.getIECList());
+         
+         // Populates the map
+         for(IEC61850_GOOSE_MMS_DataType t : EnumSet.allOf(IEC61850_GOOSE_MMS_DataType.class))
+        	 iec_size_lookup.putAll(t.iec_size);
     }
 	 
 	 IEC61850_GOOSE_MMS_DataType (int tag)
@@ -87,9 +98,13 @@ public enum IEC61850_GOOSE_MMS_DataType
 	 {
 		 this.tag = tag;
 		 
-		 for(int position = 0; position< string_list.length; position++)
+		 for(int position = 0; position< string_list.length; position+=2)
 		 {
+			 // We save the IEC Datatype in the list
 			 this.iec_list.add(string_list[position]);
+			 
+			 // The save the Byte size and IEC Datatype in the map
+			 this.iec_size.put(string_list[position],Integer.parseInt(string_list[position+1]));
 		 }
 	 }
 	 
@@ -107,6 +122,16 @@ public enum IEC61850_GOOSE_MMS_DataType
 	 { 
           return tag_lookup.get(tag); 
      }
+	 
+	 public static int get_size(String iec_type) throws IEC61850_GOOSE_Exception
+	 {
+		 if(iec_size_lookup.containsKey(iec_type))
+			 return iec_size_lookup.get(iec_type);
+		 
+		 else
+			 // If the IEC type is not found, we throw an exception
+			 throw new IEC61850_GOOSE_Exception("No MMS type corresponding to IEC type");
+	 }
 	 
 	 public static IEC61850_GOOSE_MMS_DataType get(String iec_type) throws IEC61850_GOOSE_Exception
 	 {

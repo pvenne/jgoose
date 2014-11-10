@@ -20,7 +20,7 @@
  * This class is used to represent a single data element within and IEC61850 frame. 
  * 
  * @author  Philippe Venne
- * @version 0.1
+ * @version 0.2
  *
  */
 
@@ -95,10 +95,8 @@ public class IEC61850_GOOSE_Data_Element
 				
 			case booln:
 				if (this.length == 1)
-				{
 					value = new Boolean(currentEntry.getUByte(offset+2) != 0);
-					//nbOfElements = 1;
-				}
+				
 				else
 					throw new UnsupportedOperationException("In IEC61850_GOOSE_Data_Element::decode Cannot read boolean on more than  1 byte");
 				
@@ -133,6 +131,20 @@ public class IEC61850_GOOSE_Data_Element
 					
 				else
 					throw new UnsupportedOperationException("In IEC61850_GOOSE_Data_Element::decode Cannot read unsigned integer on 3 bytes");
+				break;
+				
+			case float_point:
+				if (this.length == 4)
+					//TODO test this
+					value = new Float(currentEntry.getFloat(offset+2));
+
+				else if (this.length == 8)
+					//TODO test this
+					value = new Double(currentEntry.getDouble(offset+2));
+				
+				else
+					throw new UnsupportedOperationException("In IEC61850_GOOSE_Data_Element::decode Cannot read float on other than 4 or 8 bytes");
+				
 				break;
 				
 			default:
@@ -338,7 +350,40 @@ public class IEC61850_GOOSE_Data_Element
 					throw new UnsupportedOperationException("Cannot write integer on 3 bytes");
 				
 				break;
-					
+				
+			case float_point:
+				
+				if (this.length == 4)
+				{
+					if (this.value.getClass() == Float.class)
+					{
+						currentEntry.setFloat(offset+2, ((Float)this.value).floatValue());
+					}
+					else if (this.value.getClass() == Double.class)
+					{
+						currentEntry.setFloat(offset+2, ((Double)this.value).floatValue());
+					}
+					else
+						throw new UnsupportedOperationException("In IEC61850_GOOSE_Data_Element::encode Unsupported object type");
+				}
+				else if (this.length == 8)
+				{
+					if (this.value.getClass() == Float.class)
+					{
+						currentEntry.setDouble(offset+2, ((Float)this.value).doubleValue());
+					}
+					else if (this.value.getClass() == Double.class)
+					{
+						currentEntry.setDouble(offset+2, ((Double)this.value).doubleValue());
+					}
+					else
+						throw new UnsupportedOperationException("In IEC61850_GOOSE_Data_Element::encode Unsupported object type");
+				}
+				else
+					throw new UnsupportedOperationException("In IEC61850_GOOSE_Data_Element::encode Unsupported object type");
+				
+				break;
+				
 			default:
 				throw new UnsupportedOperationException("In IEC61850_GOOSE_Data_Element::encode Unsupported object type");
 		}

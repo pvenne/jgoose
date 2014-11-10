@@ -20,7 +20,7 @@
  * This class is used to manipulate an IEC61850 frame. It interfaces the IEC61850 data.
  * 
  * @author  Philippe Venne
- * @version 0.1
+ * @version 0.2
  *
  */
 
@@ -138,6 +138,7 @@ public class IEC61850_GOOSE_Frame {
 		// We build the payload
 		gooseData = new IEC61850_GOOSE_Data(numDatSetEntries);
 		
+		// The allData_length is not the final lenght as the data types and size are not initialised at this point
 		allData_length =  sizeOf(gooseData);
 		
 	}
@@ -204,6 +205,10 @@ public class IEC61850_GOOSE_Frame {
 			gooseData.setType(position, IEC61850_GOOSE_MMS_DataType.get(current_signal_map_entry.getValue().bType));
 			//current_signal_map_entry.getValue().data.dataType = IEC61850_GOOSE_MMS_DataType.get(current_signal_map_entry.getValue().bType);
 			
+			// We initialise the data length for every data_element
+			// The number of byte is set according to the type of element specified in the ICD file
+			gooseData.setLength(position, IEC61850_GOOSE_MMS_DataType.get_size(current_signal_map_entry.getValue().bType));
+			
 			// We initialise every element
 			switch(IEC61850_GOOSE_MMS_DataType.get(current_signal_map_entry.getValue().bType))
 			{
@@ -219,12 +224,13 @@ public class IEC61850_GOOSE_Frame {
 					gooseData.setValue(position, new Integer(0));
 					break;
 					
+				case float_point:
+					gooseData.setValue(position, new Double(0));
+					break;
+					
 				default:
 					throw new UnsupportedOperationException("Unsupported data type");
 			}
-			
-			// We initialise the data length for every data_element
-			gooseData.setLength(position, sizeOf(gooseData.getValue(position)));
 		}
 		
 		allData_length =  sizeOf(gooseData);
@@ -600,7 +606,7 @@ public class IEC61850_GOOSE_Frame {
 		// Used by many different types
 		// String, int, IEC61850_GOOSE_Data_Element, IEC61850_GOOSE_Data
 		
-		int local_value;
+		//int local_value;
 		
 		if (data.getClass() == Integer.class)
 		{
@@ -618,6 +624,7 @@ public class IEC61850_GOOSE_Frame {
 				throw new IEC61850_GOOSE_Exception("Value out of range");
 			
 		}
+		
 		if(data.getClass() == Long.class)
 		{
 			// When type is long, we assume it will be unsigned
@@ -633,6 +640,7 @@ public class IEC61850_GOOSE_Frame {
 			else
 				throw new IEC61850_GOOSE_Exception("Value out of range");
 		}
+		
 		else if (data.getClass() == Boolean.class)
 			// boolean is always of size 1
 			return 1;
@@ -649,6 +657,17 @@ public class IEC61850_GOOSE_Frame {
 				throw new IEC61850_GOOSE_Exception("Value out of range");
 			
 		}
+		
+		if(data.getClass() == Float.class)
+		{
+			return 4;
+		}
+		
+		else if(data.getClass() == Double.class)
+		{
+			return 8;
+		}
+		
 		else if (data.getClass() == IEC61850_GOOSE_Data.class)
 		{
 			int total_size = 0;
@@ -665,6 +684,10 @@ public class IEC61850_GOOSE_Frame {
 		}
 		else if (data.getClass() == IEC61850_GOOSE_Data_Element.class)
 		{
+			return ((IEC61850_GOOSE_Data_Element)data).length;
+			
+			/*
+			
 			switch(((IEC61850_GOOSE_Data_Element)data).dataType)
 			{
 				case booln:
@@ -701,10 +724,23 @@ public class IEC61850_GOOSE_Frame {
 
 					else
 						throw new IEC61850_GOOSE_Exception("Value out of range");
+				
+				// Finish it up
+				case float_point:
+				
+					if(data.getClass() == Float.class)
+					{
+						return 4;
+					}
+					else if(data.getClass() == Double.class)
+					{
+						return 8;
+					}
 					
 				default:
 					throw new UnsupportedOperationException("Unsupported data type");
 			}
+			*/
 		}
 		else
 		{
