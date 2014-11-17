@@ -79,8 +79,6 @@ public class IEC61850_GOOSE_API
 		@Override
 		public void eventHandler(IEC61850_GOOSE_Frame gooseFrame, IEC61850_GOOSE_Task transmit_task) 
 		{
-			System.out.printf("Starting Send Values event handler\n");
-			
 			// First, we call the user defined event handler
 			// The user will update the data the way he wants to
 			gooseFrame.frameEventHandler.eventHandler(gooseFrame);
@@ -115,12 +113,7 @@ public class IEC61850_GOOSE_API
 				e.printStackTrace();
 			}
 			
-			
-			System.out.printf("Done with updatePacket_From_Frame\n");
-			
 			api_port.send(transmit_task.goose_memoryPacket);
-			
-			System.out.printf("Leaving send values event handler\n");
 		}
 	}
 	
@@ -130,8 +123,6 @@ public class IEC61850_GOOSE_API
 		@Override
 		public void eventHandler(IEC61850_GOOSE_Frame gooseFrame, IEC61850_GOOSE_Task transmit_task) 
 		{
-			System.out.printf("Starting Retransmit event handler\n");
-			
 			// Now, we need to increment the sequence number
 			try 
 			{
@@ -141,12 +132,8 @@ public class IEC61850_GOOSE_API
 			{
 				e.printStackTrace();
 			}
-			
-			System.out.printf("Done with incrementSqNum\n");
-			
+
 			api_port.send(transmit_task.goose_memoryPacket);
-			
-			System.out.printf("Leaving Retransmit event handler\n");
 		}
 	}
 	
@@ -648,16 +635,16 @@ public class IEC61850_GOOSE_API
         
 		
 		// We start the main receive thread
+		/*
         if(mainReceiveThread == null)
         {
         	mainReceiveThread = new Thread(new GSEControlBlockReceiver());
         	mainReceiveThread.start();
         }
+        */
         
         // the start the transmit and receive port
         this.api_port.start();
-		
-        System.out.printf("End of startIEC61850API \n");
 	}
 	
 	/**
@@ -684,8 +671,10 @@ public class IEC61850_GOOSE_API
 		this.api_port.stop();
 		
 		// Third we stop the main receive thread
+		/*
 		mainReceiveThread.interrupt();
 		mainReceiveThread.join();
+		*/
 		
 		// Last we disable all receive threads
 		Iterator<IEC61850_GOOSE_ReceiveTask> frameReceiveTask_IT;
@@ -701,8 +690,6 @@ public class IEC61850_GOOSE_API
 				current_ReceiveTask.disable();
 			}
 		}
-		
-		System.out.printf("End of stopIEC61850API \n");
 	}
 	
 	/**
@@ -724,10 +711,6 @@ public class IEC61850_GOOSE_API
 	 */
 	public void triggerEvent(String appID_name) throws IEC61850_GOOSE_Exception
 	{
-		// GSEControlBlockAttributes corresponding to the current event;
-		//IEC61850_GOOSE_GSEControlBlock current_GSEControlBlockAttributes;
-		System.out.printf("In triggerEvent\n");
-		
 		IEC61850_GOOSE_TransmitTask transmit_task;
 		transmit_task = transmitFrameTaskMap.get(appID_name);
 		
@@ -743,13 +726,10 @@ public class IEC61850_GOOSE_API
 			else
 				// As no new packet was received, we just call the event handler on the latest received packet
 				receive_task.goose_frame.frameEventHandler.eventHandler(receive_task.goose_frame);
-			
 		}
 		else
 			// We set the flag to signify that data is changed
 			transmit_task.dataHasBeenChanged();
-		
-		
 	}
 	
 	

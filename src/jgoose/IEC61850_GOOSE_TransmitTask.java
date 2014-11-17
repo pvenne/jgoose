@@ -103,59 +103,50 @@ public class IEC61850_GOOSE_TransmitTask extends IEC61850_GOOSE_Task
 		this.minimum_delay = minimum_delay;
 		this.maximum_delay = maximum_delay;
 		
-		goose_memoryPacket = transmit_frame.makeNewPacket();
+		this.goose_memoryPacket = transmit_frame.makeNewPacket();
 		
 	}
 	
 	// The method is used to start the transmission. It changes the state to send_values
 	public  void enable() throws  InterruptedException, IEC61850_GOOSE_Exception
 	{
-		
-		synchronized (current_state)
+		if (current_state == Transmitter_State.non_existent)
 		{
-		
-			if (current_state == Transmitter_State.non_existent)
-			{
-				
-				// When a Transmit task is enabled, it triggers sending the first values
-				current_state = Transmitter_State.send_values;
-				
-				// We start the scheduler task. It goes in wait state right away
-				transmitter = new  IEC61850_GOOSE_TransmitTask_Transmitter();
-				transmitter.start();
-				
-			}
-	
-			else
-			{
-				throw new IEC61850_GOOSE_Exception("The task is already started. Ignored");
-			}
+			
+			// When a Transmit task is enabled, it triggers sending the first values
+			current_state = Transmitter_State.send_values;
+			
+			// We start the scheduler task. It goes in wait state right away
+			transmitter = new  IEC61850_GOOSE_TransmitTask_Transmitter();
+			transmitter.start();
+			
+		}
+
+		else
+		{
+			throw new IEC61850_GOOSE_Exception("The task is already started. Ignored");
 		}
 	}
 	
 	// The method is used to stop the transmission.
 	public void disable() throws IEC61850_GOOSE_Exception
 	{
-		synchronized (current_state)
+		if (current_state != Transmitter_State.non_existent)
 		{
-		
-			if (current_state != Transmitter_State.non_existent)
+			// we notify its time to refresh the timer
+			synchronized (cancel_flag)
 			{
-				// we notify its time to refresh the timer
-				synchronized (cancel_flag)
-				{
-					cancel_flag.flag = true;
-				}
-				
-				// we wakeup the sleeper thread
-				synchronized (transmitter)
-				{
-					transmitter.notify();
-				}
+				cancel_flag.flag = true;
 			}
-			else
-				throw new IEC61850_GOOSE_Exception("The transmitter is already disabled, ignoring\n");
+			
+			// we wakeup the sleeper thread
+			synchronized (transmitter)
+			{
+				transmitter.notify();
+			}
 		}
+		else
+			throw new IEC61850_GOOSE_Exception("The transmitter is already disabled, ignoring\n");
 		
 	}
 	
@@ -163,29 +154,23 @@ public class IEC61850_GOOSE_TransmitTask extends IEC61850_GOOSE_Task
 	// the last transmission.
 	public void dataHasBeenChanged() throws IEC61850_GOOSE_Exception
 	{
-		synchronized (current_state)
+		if (current_state != Transmitter_State.non_existent)
 		{
-		
-			if (current_state != Transmitter_State.non_existent)
+			// we notify its time to refresh the timer
+			synchronized (dataHasChanged_flag)
 			{
-				// we notify its time to refresh the timer
-				synchronized (dataHasChanged_flag)
-				{
-					dataHasChanged_flag.flag = true;
-				}
-				
-				// we wakeup the sleeper thread
-				
-				synchronized (transmitter)
-				{
-					transmitter.notify();
-				}
+				dataHasChanged_flag.flag = true;
 			}
-			else
-				throw new IEC61850_GOOSE_Exception("The transmitter not enabled, ignoring\n");
-		
+			
+			// we wakeup the sleeper thread
+			synchronized (transmitter)
+			{
+				transmitter.notify();
+			}
+			
 		}
-
+		else
+			throw new IEC61850_GOOSE_Exception("The transmitter not enabled, ignoring\n");
 	}
 	
 	// This Event Handler is called when transmitting new data for the first time 
@@ -222,8 +207,8 @@ public class IEC61850_GOOSE_TransmitTask extends IEC61850_GOOSE_Task
 	    public void run()
 	    {
 			// We have to create an instance of the GOOSE header for binding to work
-	        @SuppressWarnings("unused")
-	        IEC61850_GOOSE_Header dummy_goose_header = new IEC61850_GOOSE_Header();
+	        //@SuppressWarnings("unused")
+	        //IEC61850_GOOSE_Header dummy_goose_header = new IEC61850_GOOSE_Header();
 			
 	        boolean time_to_sleep = false;
 	        
@@ -415,22 +400,36 @@ public class IEC61850_GOOSE_TransmitTask extends IEC61850_GOOSE_Task
 				synchronized (current_state)
 				{
 				
-					// If the current state is send_values or retransmit, we do nothing. The system will automatically retransmit
+					// If the current state is send_values or retransmit, we do nothing. The system will automatically retransmit		
 					if (current_state == Transmitter_State.retransmit_pending )	
 					{
-						// If the dataHasChanged_flag is not set, we go re retransmission
-						if(! dataHasChanged_flag.flag)
+						// If the dataHasChanged_flag is not set and there is no cancel request, we go re retransmission
+						if((! dataHasChanged_flag.flag) && (! cancel_flag.flag))
+						{
 							// We change the current state to retransmit
 							synchronized (current_state)
 							{
 								current_state = Transmitter_State.retransmit;
 							}
 						
-						// we notify the scheduler thread
-						synchronized (transmitter)
-						{
-							transmitter.notify();
+							// we notify the scheduler thread
+							synchronized (transmitter)
+							{
+								transmitter.notify();
+							}
 						}
+						
+						// If the dataHasChanged_flag is set and there is no cancel request
+						else if( dataHasChanged_flag.flag && (! cancel_flag.flag))
+						{
+							// we notify the scheduler thread
+							synchronized (transmitter)
+							{
+								transmitter.notify();
+							}
+						}
+						
+						
 					}
 					else if (current_state == Transmitter_State.non_existent )
 					{

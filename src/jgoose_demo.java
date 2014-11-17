@@ -63,6 +63,8 @@ public class jgoose_demo {
 			String network_MAC;
 		}
 		
+		System.out.printf("Start of jgoose_demo\n");
+		
 		// We process the command line options
 		final cmdLineOptions options = new cmdLineOptions();
 		final CmdLineParser parser = new CmdLineParser(options);
@@ -346,8 +348,6 @@ public class jgoose_demo {
 			@Override
 			public void eventHandler(IEC61850_GOOSE_Frame gooseFrame) {
 
-				System.out.printf("In FROM_PC_EventHandler\n");
-				
 				// We set the values according to the current value of the variables
 				try 
 				{
@@ -374,8 +374,6 @@ public class jgoose_demo {
 				}
 				
 				gooseFrame.test = exchangedData.tx_testFlag;
-				
-				System.out.printf("Done FROM_PC_EventHandler\n");
 			}
 		}
 		
@@ -556,5 +554,7 @@ public class jgoose_demo {
 		
 		// We close the port
 		goose_port.close();
+		
+		System.out.printf("End of jgoose_demo\n");
 	}
 }

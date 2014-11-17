@@ -280,7 +280,7 @@ public class IEC61850_GOOSE_Frame {
 			goose_memoryPacket = makeNewPacket();
 			
 			// We need to rescan because the goose header length has changed
-			goose_memoryPacket.scan(JProtocol.ETHERNET_ID);
+			//goose_memoryPacket.scan(JProtocol.ETHERNET_ID);
 			
 			goose_header = goose_memoryPacket.getHeader( new IEC61850_GOOSE_Header());
 		}
@@ -414,14 +414,17 @@ public class IEC61850_GOOSE_Frame {
 	}
 	
 	// This function only increments the sequence number ain the frame and the packet
-	public JMemoryPacket incrementSqNum(JMemoryPacket goose_memoryPacket) throws IEC61850_GOOSE_Exception{
-		
-		// We need to rescan to identify the goose header
-		goose_memoryPacket.scan(JProtocol.ETHERNET_ID); 
-		
+	public JMemoryPacket incrementSqNum(JMemoryPacket goose_memoryPacket) throws IEC61850_GOOSE_Exception
+	{
 		// We have to bind the goose_header to the JMemoryPacket
 		IEC61850_GOOSE_Header goose_header = goose_memoryPacket.getHeader( new IEC61850_GOOSE_Header());
-		
+		if (goose_header == null)
+		{
+			// Something strange here, sometimes, not always, the header arrives not decoded. Then we have to scan it.
+			goose_memoryPacket.scan(JProtocol.ETHERNET_ID); 
+			goose_header = goose_memoryPacket.getHeader( new IEC61850_GOOSE_Header());
+		}
+	
 		// We increment the sequence number in smaller than 4294967295
 		if ((sqNum < 4294967295L))
 		{
@@ -446,9 +449,6 @@ public class IEC61850_GOOSE_Frame {
 			// We need to make a new packet
 			goose_memoryPacket = makeNewPacket();
 			
-			// We need to rescan because the goose header length has changed
-			goose_memoryPacket.scan(JProtocol.ETHERNET_ID);
-			
 			// We have to bind the goose_header to the new JMemoryPacket
 			goose_header = goose_memoryPacket.getHeader( new IEC61850_GOOSE_Header());
 			
@@ -463,7 +463,6 @@ public class IEC61850_GOOSE_Frame {
 		
 			// time stamp the new packet
 			goose_header.utc(time_stamp_original_packet);
-			
 		}
 		else
 		{
