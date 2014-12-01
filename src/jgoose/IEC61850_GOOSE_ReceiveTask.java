@@ -127,34 +127,6 @@ public class IEC61850_GOOSE_ReceiveTask extends IEC61850_GOOSE_Task{
 			System.err.printf("The Receive Task is already started, ignoring\n");
 		}
 	}
-	
-	
-	/**
-	 * Starts the watchdog
-	 * 
-	 * @param local_delay	The delay (milliseconds) before the watchdog starts the event handler
-	 * 
-	 */
-/*	public void start(long local_delay)
-	{
-		if (current_state == WatchdogTask_State.not_started)
-		{
-			delay = local_delay;
-			
-			synchronized (current_state)
-			{
-				current_state = WatchdogTask_State.running;
-			}
-				
-			// start a new sleeper thread
-			sleeper = new IEC61850_WatchdogTask_Sleeper();
-			sleeper.start();
-		}
-		else
-		{
-			System.err.printf("The watchdog is already started, ignoring\n");
-		}
-	}*/
 
 	/**
 	 * Resets the watchdog timer
@@ -256,8 +228,7 @@ public class IEC61850_GOOSE_ReceiveTask extends IEC61850_GOOSE_Task{
 					}
 				}
 				
-				// The delay was expired
-				
+				// The delay was expired or we were notified
 				
 				if ( refresh_flag.flag )
 				{
@@ -266,7 +237,10 @@ public class IEC61850_GOOSE_ReceiveTask extends IEC61850_GOOSE_Task{
 					{
 						refresh_flag.flag = false;
 					}
+					
+					// Now we will go to sleep again
 				}
+				/*
 				else if (cancel_flag.flag)
 				{
 					synchronized (cancel_flag)
@@ -274,9 +248,12 @@ public class IEC61850_GOOSE_ReceiveTask extends IEC61850_GOOSE_Task{
 						cancel_flag.flag = false;
 					}
 				}
-				else
+				*/
+				
+				// If we woke up and its not a cancel flag or a refresh flag,
+				// then the watchdog has expired
+				else if ( ! cancel_flag.flag)
 				{
-					// The watchdog has expired
 					synchronized (current_state)
 					{
 						current_state = WatchdogTask_State.expired;
@@ -304,6 +281,11 @@ public class IEC61850_GOOSE_ReceiveTask extends IEC61850_GOOSE_Task{
 			// We received a cancel flag
 			synchronized (current_state)
 			{
+				synchronized (cancel_flag)
+				{
+					cancel_flag.flag = false;
+				}
+				
 				current_state = WatchdogTask_State.stopped;
 			}
 			
