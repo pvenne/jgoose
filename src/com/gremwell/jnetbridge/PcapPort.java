@@ -9,6 +9,8 @@ import org.jnetpcap.nio.JBuffer;
 import org.jnetpcap.nio.JMemory;
 import org.jnetpcap.packet.PcapPacket;
 import org.jnetpcap.protocol.JProtocol;
+import org.jnetpcap.winpcap.WinPcap;
+import org.jnetpcap.winpcap.WinPcapRmtAuth;
 
 /**
  * This class implements a port receiving and sending network packets
@@ -36,6 +38,9 @@ public class PcapPort extends Port {
     
     private PcapBpfProgram packet_filter_program;
     
+    // This flag is used to prevent capturing locally generated traffic on a windows platform (winpcap)
+    private final static int PCAP_OPENFLAG_NOCAPTURE_LOCAL = 0x8;
+    
     private final static int snaplen = 64 * 1024;
     private final static int flags = Pcap.MODE_PROMISCUOUS;
     private static int timeoutMs = 1;
@@ -48,22 +53,39 @@ public class PcapPort extends Port {
         if (!Pcap.isPcap100Loaded()) {
             throw new PcapException("jnetpcap1.4 + libpcap1.0.0+ are required");
         }
-
-        pcap = Pcap.create(ifaceName, errbuf);
-        if (pcap == null) {
-            throw new PcapException("failed to create pcap interface " + ifaceName + ": " + errbuf.toString());
+        
+        if (WinPcap.isSupported() == true)
+        //if (false)
+        {
+            // This code will be used on a windows platform (winpcap)
+        	
+        	WinPcapRmtAuth auth = null;
+        	pcap = WinPcap.open(ifaceName, snaplen, flags | PCAP_OPENFLAG_NOCAPTURE_LOCAL, timeoutMs, auth, errbuf);
+        	
         }
+        else
+        {
+        	// This code will be used on all other platforms
+        	
+        	pcap = Pcap.create(ifaceName, errbuf);
+            if (pcap == null) {
+                throw new PcapException("failed to create pcap interface " + ifaceName + ": " + errbuf.toString());
+            }
+        	
+        	// standard properties
+            pcap.setSnaplen(snaplen);
+            pcap.setPromisc(flags);
+            pcap.setTimeout(timeoutMs);
 
-        // standard properties
-        pcap.setSnaplen(snaplen);
-        pcap.setPromisc(flags);
-        pcap.setTimeout(timeoutMs);
+            // specific to libpcap 1.0.0
+            
+            // pcap.setDirection is not implemented on a windows platform (winpcap)
+            // the flag method must be used
+            pcap.setDirection(Pcap.Direction.IN);
+            pcap.setBufferSize(bufsizeBytes);
 
-        // specific to libpcap 1.0.0
-        pcap.setDirection(Pcap.Direction.IN);
-        pcap.setBufferSize(bufsizeBytes);
-
-        pcap.activate();
+            pcap.activate();	
+        }
 
         return pcap;
     }
