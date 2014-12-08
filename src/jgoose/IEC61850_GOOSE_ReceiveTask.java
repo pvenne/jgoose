@@ -102,7 +102,9 @@ public class IEC61850_GOOSE_ReceiveTask extends IEC61850_GOOSE_Task{
 		
 		current_state = WatchdogTask_State.not_started;
 		
-		goose_memoryPacket = goose_frame.makeNewPacket();
+		//The goose_memoryPacket is not needed for received frames
+		goose_memoryPacket = null;
+		goose_header = null;
 	}
 	
 	

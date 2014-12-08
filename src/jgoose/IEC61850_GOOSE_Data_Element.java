@@ -78,7 +78,7 @@ public class IEC61850_GOOSE_Data_Element
 		// The second byte is the data length
 		this.length = currentEntry.getUByte(offset+1);
 		
-		switch (dataType)
+		switch (this.dataType)
 		{
 			/*
 			case array:

@@ -23,5 +23,6 @@ public abstract class IEC61850_GOOSE_Task
 {
 
 	JMemoryPacket goose_memoryPacket;
+	IEC61850_GOOSE_Header goose_header;
 	IEC61850_GOOSE_Frame goose_frame;
 }

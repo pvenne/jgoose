@@ -103,8 +103,7 @@ public class IEC61850_GOOSE_TransmitTask extends IEC61850_GOOSE_Task
 		this.minimum_delay = minimum_delay;
 		this.maximum_delay = maximum_delay;
 		
-		this.goose_memoryPacket = transmit_frame.makeNewPacket();
-		
+		transmit_frame.makeNewPacket(this);
 	}
 	
 	// The method is used to start the transmission. It changes the state to send_values

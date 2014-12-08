@@ -252,7 +252,7 @@ public class jgoose_demo {
 					Object value;
 					value = gooseFrame.gooseData.getValue(position);
 					
-					if (value.getClass() == byte.class)
+					if (value.getClass() == Byte.class)
 					{
 						switch(gooseFrame.gooseData.getType(position))
 						{
@@ -272,7 +272,7 @@ public class jgoose_demo {
 								System.out.printf("Data type not supported\n");
 						}
 					}
-					else if( value.getClass() == short.class)
+					else if( value.getClass() == Short.class)
 					{
 						switch(gooseFrame.gooseData.getType(position))
 						{
@@ -292,7 +292,7 @@ public class jgoose_demo {
 								System.out.printf("Data type not supported\n");
 						}
 					}
-					else if( value.getClass() == int.class)
+					else if( value.getClass() == Integer.class)
 					{
 						switch(gooseFrame.gooseData.getType(position))
 						{
@@ -312,7 +312,7 @@ public class jgoose_demo {
 								System.out.printf("Data type not supported\n");
 						}
 					}
-					else if ( value.getClass() == long.class)
+					else if ( value.getClass() == Long.class)
 					{
 						switch(gooseFrame.gooseData.getType(position))
 						{
@@ -332,6 +332,31 @@ public class jgoose_demo {
 								System.out.printf("Data type not supported\n");
 						}
 					}
+					else if ( value.getClass() == Float.class)
+					{
+						switch(gooseFrame.gooseData.getType(position))
+						{
+							case float_point:
+		            			System.out.printf("float data[%d]=%f ", position, ((Float) value).floatValue());
+		            			break;
+								
+							default:
+								System.out.printf("Data type not supported\n");
+						}
+					}
+					else if ( value.getClass() == Double.class)
+					{
+						switch(gooseFrame.gooseData.getType(position))
+						{
+							case float_point:
+		            			System.out.printf("float data[%d]=%f ", position, ((Double) value).floatValue());
+		            			break;
+								
+							default:
+								System.out.printf("Data type not supported\n");
+						}
+					}
+					
 					else
 					{
 						System.out.printf("Unknown type");
@@ -403,6 +428,7 @@ public class jgoose_demo {
 			api_instance.registerGSEControlBlock(IEC61850_GOOSE_FrameEventHandlerType.receive, "GSE_APPID_TO_PC", to_handler);
 		
 			// Register the default Event handler used to process GOOSE messages of undefined control block ID
+			// TODO test enabling the MAC filter by not defining a DEFAULT event handler
 			api_instance.registerGSEControlBlock(IEC61850_GOOSE_FrameEventHandlerType.receive, "DEFAULT", default_handler);
 		
 			// Register the GOOSE control block used to transmit messages
@@ -421,9 +447,10 @@ public class jgoose_demo {
 		api_instance.startIEC61850API();
 		
 		try {
-			// TODO enable receive frame
-			
 			// If a DEFAULT receive handler is defined, it is automatically enabled when the API is started
+			
+			// TODO enable receive frame
+			//api_instance.enableGSEControlBlock("GSE_APPID_TO_PC");
 			
 			// We have to enable the GSEControlBlock of the transmit frame for transmission to start
 			api_instance.enableGSEControlBlock("GSE_APPID_FROM_PC");
@@ -543,12 +570,13 @@ public class jgoose_demo {
 		
 		Thread.sleep(5000);
 		
+		// TODO test trigger event on received frame
 		
 		// We stop the API
 		try {
 			api_instance.stopIEC61850API();
 		} catch (IEC61850_GOOSE_Exception e) {
-			// TODO Auto-generated catch block
+			System.err.println("Could not stop the API");
 			e.printStackTrace();
 		}
 		

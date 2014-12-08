@@ -38,7 +38,6 @@ import jgoose.IEC61850_GOOSE_ReceiveTask.WatchdogTask_State;
 
 import org.jdom2.JDOMException;
 import org.jnetpcap.packet.JMemoryPacket;
-import org.jnetpcap.protocol.JProtocol;
 
 import com.gremwell.jnetbridge.*;
 
@@ -106,7 +105,7 @@ public class IEC61850_GOOSE_API
 			// Now we update the packet
 			try 
 			{
-				transmit_task.goose_memoryPacket = gooseFrame.updatePacket_From_Frame(transmit_task.goose_memoryPacket);
+				transmit_task = gooseFrame.updatePacket_From_Frame(transmit_task);
 			} 
 			catch (IEC61850_GOOSE_Exception e) 
 			{
@@ -126,7 +125,7 @@ public class IEC61850_GOOSE_API
 			// Now, we need to increment the sequence number
 			try 
 			{
-				transmit_task.goose_memoryPacket = gooseFrame.incrementSqNum(transmit_task.goose_memoryPacket);
+				transmit_task = gooseFrame.incrementSqNum(transmit_task);
 			} 
 			catch (IEC61850_GOOSE_Exception e) 
 			{
@@ -138,7 +137,7 @@ public class IEC61850_GOOSE_API
 	}
 	
 	// We define the event handler called when a received GOOSE message has expired
-	class ReceiveTask_EventHandler implements IEC61850_GOOSE_TaskEventHandler 
+	class ReceiveTask_TimerExpired_EventHandler implements IEC61850_GOOSE_TaskEventHandler 
 	{
 		@Override
 		public void eventHandler(IEC61850_GOOSE_Frame gooseFrame, IEC61850_GOOSE_Task receive_task) 
@@ -189,7 +188,7 @@ public class IEC61850_GOOSE_API
 	            	
 	            	// The Pcap port already decoded the ETHERNET header
 	            	// We need to decode other headers
-	            	incomingPacket.packet.scan(JProtocol.ETHERNET_ID);
+	            	//incomingPacket.packet.scan(JProtocol.ETHERNET_ID);
 	            	//incomingPacket.packet.scan(JProtocol.)
 					
 					// We have to bind the goose_header to the JMemoryPacket
@@ -206,7 +205,6 @@ public class IEC61850_GOOSE_API
 					// The Goose Header is Valid
 					else
 	            	{
-
 						if(receiveFrameTaskMap.containsKey(packet_goose_header.goID()))
 	            		{
 	            			// We check if the IEC61850_GOOSE_ReceiveTask is enabled
@@ -253,25 +251,26 @@ public class IEC61850_GOOSE_API
 	            			}	
 	            		}
 						// TODO fix this
-	            		/*else if (containsDefault)
+	            		else if (containsDefault)
 	            		{
 	            			// There is a default handler
 	            			IEC61850_GOOSE_ReceiveTask current_task = receiveFrameTaskMap.get("DEFAULT");
 	            			
-	            			// We save the packet for future use
-							current_task.goose_memoryPacket = new JMemoryPacket(incomingPacket.packet);
-	            			
 	            			// 1. We decode the packet
-        					current_task.goose_frame.updateFrame_From_UnknownPacket(incomingPacket.packet);
+        					try {
+								current_task.goose_frame.updateFrame_From_UnknownPacket(incomingPacket.packet);
+							} catch (IEC61850_GOOSE_Exception e) {
+								e.printStackTrace();
+							}
         					
-        					// 2. We call the user defined event handler
+        					// 2. We call the user defined DEFAULT event handler
         					current_task.goose_frame.frameEventHandler.eventHandler(current_task.goose_frame);
 	            		}
 	            		else
 	        			{
 	        				// The default frame is not defined. Nothing to do.
-	        				System.err.printf("Unknown Frame with GoID %s received. Nothing to do with it", packet_goose_header.goID());
-	        			}*/
+	        				System.err.printf("Unknown Frame with GoID %s received. Nothing to do with it. This is strange ?!?", packet_goose_header.goID());
+	        			}
 					}
 				} 
 	            catch (InterruptedException e) 
@@ -424,31 +423,35 @@ public class IEC61850_GOOSE_API
 					// For a received GOOSE Frame, we have the event handler and the GSEControlBlock
 					IEC61850_GOOSE_ReceiveTask receive_task;
 					
+					if(new_GSEControlBlock.mintime == 0)
+					{
+						System.out.println("MinTime not specified for receive frame with appID_name:" + appID_name + " using 0");
+					}
+					
+					if(new_GSEControlBlock.maxtime == 0)
+					{
+						System.out.println("MaxTime not specified for receive frame with appID_name:" + appID_name + " using " + default_maxtime);
+						new_GSEControlBlock.maxtime = default_maxtime;
+					}
+					
+					// This is the user defined event handler that is called when a new frame is received
 					local_GOOSE_Frame = new IEC61850_GOOSE_Frame(event_handler,new_GSEControlBlock);
 					
 					receive_task = new IEC61850_GOOSE_ReceiveTask(local_GOOSE_Frame,appID_name);
 					
 					// Create instances of event handlers
-					IEC61850_GOOSE_TaskEventHandler receive_handler = new ReceiveTask_EventHandler();
+					IEC61850_GOOSE_TaskEventHandler receive_expired_handler = new ReceiveTask_TimerExpired_EventHandler();
 					
-					receive_task.registerEventHandler(receive_handler);
+					// This is the system event handler that is called when a packet has expired
+					receive_task.registerEventHandler(receive_expired_handler);
 					
 					receiveFrameTaskMap.put(appID_name, receive_task);
-					
-					
-					if(new_GSEControlBlock.mintime == 0)
-					{
-						System.out.println("MinTime not specified for receive frame with appID_name:" + appID_name + " using 0");
-					}
 					
 					break;
 				
 				case transmit:
 
 					IEC61850_GOOSE_TransmitTask transmit_task;
-		
-					local_GOOSE_Frame = new IEC61850_GOOSE_Frame(event_handler,new_GSEControlBlock);
-					local_GOOSE_Frame.sourceMacAddress = this.macAddress;
 					
 					if(new_GSEControlBlock.mintime == 0)
 					{
@@ -460,6 +463,9 @@ public class IEC61850_GOOSE_API
 						System.out.println("MaxTime not specified for transmit frame with appID_name:" + appID_name + " using " + default_maxtime);
 						new_GSEControlBlock.maxtime = default_maxtime;
 					}
+					
+					local_GOOSE_Frame = new IEC61850_GOOSE_Frame(event_handler,new_GSEControlBlock);
+					local_GOOSE_Frame.sourceMacAddress = this.macAddress;
 					
 					// The thread is called every maxtime or when triggered
 					transmit_task = new IEC61850_GOOSE_TransmitTask(local_GOOSE_Frame, new_GSEControlBlock.mintime, new_GSEControlBlock.maxtime);
@@ -582,6 +588,7 @@ public class IEC61850_GOOSE_API
 		// We define receive filters
 		// ----
 	
+        // We should only receive GOOSE messages
 		final String goose_filter_str = "ether proto 0x88B8";
 		
         /*************************************************************************** 
@@ -592,6 +599,8 @@ public class IEC61850_GOOSE_API
 		
 		// if a default receive handler is defined, we will not filter on MAC addresses
 		// else, we only receive listed MAC addresses
+		
+		// TODO Test this
 		if(! receiveFrameTaskMap.containsKey("DEFAULT"))
 		{
 			boolean undefined_mac_address = false;
@@ -635,13 +644,13 @@ public class IEC61850_GOOSE_API
         
 		
 		// We start the main receive thread
-		/*
+		// TODO Beginning of code to enable receive thread
         if(mainReceiveThread == null)
         {
         	mainReceiveThread = new Thread(new GSEControlBlockReceiver());
         	mainReceiveThread.start();
         }
-        */
+        // TODO End of code to enable receive thread
         
         // the start the transmit and receive port
         this.api_port.start();
@@ -671,10 +680,10 @@ public class IEC61850_GOOSE_API
 		this.api_port.stop();
 		
 		// Third we stop the main receive thread
-		/*
+		// TODO Beginning of code to enable receive thread
 		mainReceiveThread.interrupt();
 		mainReceiveThread.join();
-		*/
+		// TODO End of code to enable receive thread
 		
 		// Last we disable all receive threads
 		Iterator<IEC61850_GOOSE_ReceiveTask> frameReceiveTask_IT;
@@ -725,6 +734,7 @@ public class IEC61850_GOOSE_API
 				throw new IEC61850_GOOSE_Exception("appID not found");
 			else
 				// As no new packet was received, we just call the event handler on the latest received packet
+				// for that specific receive task
 				receive_task.goose_frame.frameEventHandler.eventHandler(receive_task.goose_frame);
 		}
 		else

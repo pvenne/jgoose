@@ -30,6 +30,7 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.Map;
 
+import org.jnetpcap.nio.JBuffer;
 import org.jnetpcap.packet.JMemoryPacket;
 import org.jnetpcap.packet.JPacket;
 import org.jnetpcap.packet.format.FormatUtils;
@@ -236,22 +237,8 @@ public class IEC61850_GOOSE_Frame {
 		allData_length =  sizeOf(gooseData);
 	}
 	
-	/*
-	public void updateDataSize(IEC61850_GOOSE_Data local_goose_data)
-	{
-		try 
-		{
-			allData_length = sizeOf(local_goose_data);
-		} 
-		catch (IEC61850_GOOSE_Exception e) 
-		{
-			e.printStackTrace();
-		}
-	}
-	*/
-	
 	// This function is called when the data was changed
-	public JMemoryPacket updatePacket_From_Frame(JMemoryPacket goose_memoryPacket) throws IEC61850_GOOSE_Exception{
+	public IEC61850_GOOSE_Task updatePacket_From_Frame(IEC61850_GOOSE_Task transmit_task) throws IEC61850_GOOSE_Exception{
 		
 		int new_stNum_length = sizeOf(stNum);
 		int new_sqNum_length = sizeOf(sqNum);
@@ -259,49 +246,36 @@ public class IEC61850_GOOSE_Frame {
 		// we update the data length of the data in the frame
 		int new_allData_length = sizeOf(gooseData); 
 		
-		// We need to rescan to identify the goose header
-		goose_memoryPacket.scan(JProtocol.ETHERNET_ID);
-		
-		//Ethernet eth_header = goose_memoryPacket.getHeader( new Ethernet());
-		
-		// We have to bind the goose_header to the JMemoryPacket
-		IEC61850_GOOSE_Header goose_header = goose_memoryPacket.getHeader( new IEC61850_GOOSE_Header());
-		
 		// If the length of a variable length field has changed, we need to update the header
-		if( (new_stNum_length != goose_header.stNumLength()) || 
-				(new_sqNum_length != goose_header.sqNumLength()) || 
-				(new_allData_length != goose_header.gooseDataLength()))
+		if( (new_stNum_length != transmit_task.goose_header.stNumLength()) || 
+				(new_sqNum_length != transmit_task.goose_header.sqNumLength()) || 
+				(new_allData_length != transmit_task.goose_header.gooseDataLength()))
 		{
 			stNum_length = new_stNum_length;
 			sqNum_length = new_sqNum_length;
 			allData_length = new_allData_length;
 			
 			// We need to make a new packet
-			goose_memoryPacket = makeNewPacket();
-			
-			// We need to rescan because the goose header length has changed
-			//goose_memoryPacket.scan(JProtocol.ETHERNET_ID);
-			
-			goose_header = goose_memoryPacket.getHeader( new IEC61850_GOOSE_Header());
+			makeNewPacket(transmit_task);
 		}
 		
-		goose_header.sqNum(sqNum);
-		goose_header.stNum(stNum);
+		transmit_task.goose_header.sqNum(sqNum);
+		transmit_task.goose_header.stNum(stNum);
 		
 		// We set the UTC flags
-		goose_header.leapSecondsKnown = leapSecondsKnown;
-		goose_header.clockFailure = clockFailure;
-		goose_header.clockNotSynchronized = clockNotSynchronized;
-		goose_header.timeAccuracy = (byte) timeAccuracy;
+		transmit_task.goose_header.leapSecondsKnown = leapSecondsKnown;
+		transmit_task.goose_header.clockFailure = clockFailure;
+		transmit_task.goose_header.clockNotSynchronized = clockNotSynchronized;
+		transmit_task.goose_header.timeAccuracy = (byte) timeAccuracy;
 		
 		// We encode the data
-		gooseData.encodeData(goose_header.gooseData());
+		gooseData.encodeData(transmit_task.goose_header.gooseData());
 		
 		// time stamp the packet
 		// The time must be at the moment at which stNum was incremented. IEC61850-7-2 18.2.3.5
-		goose_header.utc(new Date());
+		transmit_task.goose_header.utc(new Date());
 		
-		return goose_memoryPacket;
+		return transmit_task;
 	}
 	
 	public void updateFrame_From_UnknownPacket(JPacket local_jPacket) throws IEC61850_GOOSE_Exception
@@ -387,12 +361,6 @@ public class IEC61850_GOOSE_Frame {
 	
 	public void updateFrame_From_Packet(JPacket local_jPacket){
 		
-		@SuppressWarnings("unused")
-		Ethernet eth_header = local_jPacket.getHeader( new Ethernet());
-		
-		@SuppressWarnings("unused")
-        IEEE802dot1q dot1q_header = local_jPacket.getHeader(new IEEE802dot1q()); 
-		
 		IEC61850_GOOSE_Header goose_header = local_jPacket.getHeader( new IEC61850_GOOSE_Header());
 		
 		this.test = goose_header.test();
@@ -413,18 +381,9 @@ public class IEC61850_GOOSE_Frame {
 		gooseData.decodeData(goose_header.gooseData());
 	}
 	
-	// This function only increments the sequence number ain the frame and the packet
-	public JMemoryPacket incrementSqNum(JMemoryPacket goose_memoryPacket) throws IEC61850_GOOSE_Exception
+	// This function only increments the sequence number in the frame and the packet
+	public IEC61850_GOOSE_Task incrementSqNum(IEC61850_GOOSE_Task transmit_task) throws IEC61850_GOOSE_Exception
 	{
-		// We have to bind the goose_header to the JMemoryPacket
-		IEC61850_GOOSE_Header goose_header = goose_memoryPacket.getHeader( new IEC61850_GOOSE_Header());
-		if (goose_header == null)
-		{
-			// Something strange here, sometimes, not always, the header arrives not decoded. Then we have to scan it.
-			goose_memoryPacket.scan(JProtocol.ETHERNET_ID); 
-			goose_header = goose_memoryPacket.getHeader( new IEC61850_GOOSE_Header());
-		}
-	
 		// We increment the sequence number in smaller than 4294967295
 		if ((sqNum < 4294967295L))
 		{
@@ -444,46 +403,44 @@ public class IEC61850_GOOSE_Frame {
 			sqNum_length = new_sqNum_length;
 			
 			// We save the timestamp of the original packet
-			time_stamp_original_packet = goose_header.utc();
+			time_stamp_original_packet = transmit_task.goose_header.utc();
 			
 			// We need to make a new packet
-			goose_memoryPacket = makeNewPacket();
-			
-			// We have to bind the goose_header to the new JMemoryPacket
-			goose_header = goose_memoryPacket.getHeader( new IEC61850_GOOSE_Header());
+			makeNewPacket(transmit_task);
 			
 			// We set the UTC flags
-			goose_header.leapSecondsKnown = leapSecondsKnown;
-			goose_header.clockFailure = clockFailure;
-			goose_header.clockNotSynchronized = clockNotSynchronized;
-			goose_header.timeAccuracy = (byte) timeAccuracy;
+			transmit_task.goose_header.leapSecondsKnown = leapSecondsKnown;
+			transmit_task.goose_header.clockFailure = clockFailure;
+			transmit_task.goose_header.clockNotSynchronized = clockNotSynchronized;
+			transmit_task.goose_header.timeAccuracy = (byte) timeAccuracy;
 			
 			// We encode the data
-			gooseData.encodeData(goose_header.gooseData());
+			gooseData.encodeData(transmit_task.goose_header.gooseData());
 		
 			// time stamp the new packet
-			goose_header.utc(time_stamp_original_packet);
+			transmit_task.goose_header.utc(time_stamp_original_packet);
 		}
 		else
 		{
 			// The goose_packet structure did not change. we just need to update sqNum in the header.
-			goose_header.sqNum(sqNum);
+			transmit_task.goose_header.sqNum(sqNum);
 		}
 		
-		return goose_memoryPacket;
+		return transmit_task;
 	}
 	
-	public JMemoryPacket makeNewPacket() throws IEC61850_GOOSE_Exception
+	public void makeNewPacket(IEC61850_GOOSE_Task transmit_task) throws IEC61850_GOOSE_Exception
 	{
+		
 		// We initialise the new packet
-		JMemoryPacket goose_memoryPacket = new JMemoryPacket(packetSize);
-		goose_memoryPacket.order(java.nio.ByteOrder.BIG_ENDIAN);
+		JMemoryPacket local_goose_memoryPacket = new JMemoryPacket(packetSize);
+		local_goose_memoryPacket.order(java.nio.ByteOrder.BIG_ENDIAN);
 		
 		// decodes the packet. Assign ETHERNET type to the first header
-		goose_memoryPacket.scan(JProtocol.ETHERNET_ID);
+		local_goose_memoryPacket.scan(JProtocol.ETHERNET_ID);
 		
 		// We set the Ethernet source and destination
-		Ethernet eth_header = goose_memoryPacket.getHeader( new Ethernet() );
+		Ethernet eth_header = local_goose_memoryPacket.getHeader( new Ethernet() );
 		
 		eth_header.destination(FormatUtils.toByteArray(destinationMacAddress.replaceAll("-", "")));
 		eth_header.source(FormatUtils.toByteArray(sourceMacAddress.replaceAll("-", "")));
@@ -492,37 +449,46 @@ public class IEC61850_GOOSE_Frame {
 		eth_header.type(0x88b8);
 		
 		// set GOOSE header length to a possible value for the GOOSE header to be identified
-		goose_memoryPacket.setByte(17, (byte)(packetSize - 14));
+		local_goose_memoryPacket.setByte(17, (byte)(packetSize - 14));
 		
 		// We need to rescan to identify the goose header
-		goose_memoryPacket.scan(JProtocol.ETHERNET_ID); 
+		local_goose_memoryPacket.scan(JProtocol.ETHERNET_ID); 
+		
+		// Permanently stores the packet state and data information
+		byte[] permanent_memory = new byte[local_goose_memoryPacket.getTotalSize()];
+		JBuffer permanent_buffer = new JBuffer(permanent_memory);
+		local_goose_memoryPacket.transferStateAndDataTo(permanent_buffer, 0);
+		
+		local_goose_memoryPacket.peerStateAndData(permanent_buffer);
 		
 		// We create a new GOOSE header object
-		IEC61850_GOOSE_Header goose_header = goose_memoryPacket.getHeader( new IEC61850_GOOSE_Header());
+		IEC61850_GOOSE_Header local_goose_header = local_goose_memoryPacket.getHeader( new IEC61850_GOOSE_Header());
 		
-		goose_header.encodeHeader(goCBref_length, timeAllowedToLive_length, 
+		local_goose_header.encodeHeader(goCBref_length, timeAllowedToLive_length, 
 				datSet_length, goID_length, stNum_length, sqNum_length, test_length, 
 				confRevGoose_length, ndsCom_length, numDatSetEntries_length, allData_length);
 		
 		// We need to rescan because the goose header length has changed
-		goose_memoryPacket.scan(JProtocol.ETHERNET_ID);
+		local_goose_memoryPacket.scan(JProtocol.ETHERNET_ID);
 		
 		// There is a BUG in JNetPcap, function packet.scan() does not update packet length
 		// We now adjust the packet size
-		goose_memoryPacket.setSize(goose_header.length() + eth_header.getLength());
+		local_goose_memoryPacket.setSize(local_goose_header.length() + eth_header.getLength());
 			
 		// Now we populate all constant fields of the header
-		goose_header.goCBref(goCBref);
-		goose_header.datSet(datSet);
-		goose_header.goID(goID);
-		goose_header.test(test);
-		goose_header.ndsCom(ndsCom);
-		goose_header.timeAllowedToLive(timeAllowedToLive);
-		goose_header.confRev(confRevGoose);
-		goose_header.numDatSetEntries(numDatSetEntries);
-		goose_header.appID(appID);
+		local_goose_header.goCBref(goCBref);
+		local_goose_header.datSet(datSet);
+		local_goose_header.goID(goID);
+		local_goose_header.test(test);
+		local_goose_header.ndsCom(ndsCom);
+		local_goose_header.timeAllowedToLive(timeAllowedToLive);
+		local_goose_header.confRev(confRevGoose);
+		local_goose_header.numDatSetEntries(numDatSetEntries);
+		local_goose_header.appID(appID);
 		
-		return goose_memoryPacket;
+		
+		transmit_task.goose_header = local_goose_header;
+		transmit_task.goose_memoryPacket = local_goose_memoryPacket;
 	}
 
 	public void setValueByKey(String key_name,Object value) throws IEC61850_GOOSE_Exception{
