@@ -523,7 +523,7 @@ public class IEC61850_GOOSE_Frame {
 	private static String build_datSet(IEC61850_GOOSE_GSEControlBlock blockAttributes)
 	{
 		String dataSet_string = blockAttributes.iedName + blockAttributes.deviceName + "/" + 
-		blockAttributes.ln0ClassName + "$GO$" + blockAttributes.datSet;
+		blockAttributes.ln0ClassName + "$" + blockAttributes.datSet;
 		
 		// IEC61850 limits us to 35 characters
 		if (dataSet_string.length() > 35)
@@ -555,7 +555,7 @@ public class IEC61850_GOOSE_Frame {
 	
 	private static String build_goID(IEC61850_GOOSE_GSEControlBlock blockAttributes)
 	{
-		String goID_string = blockAttributes.gseControlName;
+		String goID_string = blockAttributes.gseControlAppIDName;
 		
 		// IEC61850 limits us to 35 characters
 		if (goID_string.length() > 35)

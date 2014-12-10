@@ -42,6 +42,7 @@ public class IEC61850_GOOSE_GSEControlBlock
 	
 	// Variables holding the GSEControl block related information
 	String gseControlName;
+	String gseControlAppIDName;
 	String confRev;
 	String datSet;
 	

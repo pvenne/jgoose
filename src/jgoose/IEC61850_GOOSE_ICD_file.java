@@ -67,6 +67,7 @@ public class IEC61850_GOOSE_ICD_file {
 	
 	// Data from GSEControl section
 	public String gseControlBlockName;
+	public String gseControlBlockAppIDName;
 	public String gseControlBlockConfRev;
 	public String gseControlBlockDatSet;
 	public String deviceName;
@@ -224,6 +225,7 @@ public class IEC61850_GOOSE_ICD_file {
 		if (found_GSEControlBlock == false)
 			throw new IEC61850_GOOSE_Exception("<GSEControl> Block with corresponding appID_name: " + appID_name + " name not found in <IED>");
 		
+		gseControlBlockAppIDName = GSEControl_node.getAttributeValue("appID");
 		gseControlBlockName = GSEControl_node.getAttributeValue("name");
 		gseControlBlockConfRev = GSEControl_node.getAttributeValue("confRev");
 		gseControlBlockDatSet = GSEControl_node.getAttributeValue("datSet");

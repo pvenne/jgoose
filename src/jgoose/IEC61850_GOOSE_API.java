@@ -381,6 +381,7 @@ public class IEC61850_GOOSE_API
 			
 			// We save the GSEControl node, the name, the confRev and the datSet
 			new_GSEControlBlock.gseControlName = ICD_Config_file.gseControlBlockName;
+			new_GSEControlBlock.gseControlAppIDName = ICD_Config_file.gseControlBlockAppIDName;
 			new_GSEControlBlock.confRev = ICD_Config_file.gseControlBlockConfRev;
 			new_GSEControlBlock.datSet = ICD_Config_file.gseControlBlockDatSet;
 			
