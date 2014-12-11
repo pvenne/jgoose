@@ -461,14 +461,14 @@ public class IEC61850_GOOSE_API
 					if(new_GSEControlBlock.maxtime == 0)
 					{
 						System.out.println("MaxTime not specified for transmit frame with appID_name:" + appID_name + " using " + default_maxtime);
-						new_GSEControlBlock.maxtime = default_maxtime;
+						new_GSEControlBlock.maxtime = default_maxtime /2;
 					}
 					
 					local_GOOSE_Frame = new IEC61850_GOOSE_Frame(event_handler,new_GSEControlBlock);
 					local_GOOSE_Frame.sourceMacAddress = this.macAddress;
 					
 					// The thread is called every maxtime or when triggered
-					transmit_task = new IEC61850_GOOSE_TransmitTask(local_GOOSE_Frame, new_GSEControlBlock.mintime, new_GSEControlBlock.maxtime);
+					transmit_task = new IEC61850_GOOSE_TransmitTask(local_GOOSE_Frame, new_GSEControlBlock.mintime, new_GSEControlBlock.maxtime /2);
 					
 					// Create instances of event handlers
 					IEC61850_GOOSE_TaskEventHandler send_values_handler = new TransmitTask_SendValues_EventHandler();
