@@ -250,7 +250,6 @@ public class IEC61850_GOOSE_API
 	            				}
 	            			}	
 	            		}
-						// TODO fix this
 	            		else if (containsDefault)
 	            		{
 	            			// There is a default handler
@@ -627,7 +626,7 @@ public class IEC61850_GOOSE_API
 				filter_str += " )";
 			}
 			
-			// If one of the GSEControlBlock has an undefined MAS address, we only keep the GOOSE filter
+			// If one of the GSEControlBlock has an undefined MAC address, we only keep the GOOSE filter
 			if (undefined_mac_address)
 				filter_str = goose_filter_str;
 		}
@@ -645,13 +644,11 @@ public class IEC61850_GOOSE_API
         
 		
 		// We start the main receive thread
-		// TODO Beginning of code to enable receive thread
         if(mainReceiveThread == null)
         {
         	mainReceiveThread = new Thread(new GSEControlBlockReceiver());
         	mainReceiveThread.start();
         }
-        // TODO End of code to enable receive thread
         
         // the start the transmit and receive port
         this.api_port.start();
@@ -681,10 +678,8 @@ public class IEC61850_GOOSE_API
 		this.api_port.stop();
 		
 		// Third we stop the main receive thread
-		// TODO Beginning of code to enable receive thread
 		mainReceiveThread.interrupt();
 		mainReceiveThread.join();
-		// TODO End of code to enable receive thread
 		
 		// Last we disable all receive threads
 		Iterator<IEC61850_GOOSE_ReceiveTask> frameReceiveTask_IT;
