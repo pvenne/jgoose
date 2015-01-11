@@ -14,7 +14,7 @@
                <Address>
                   <P type="VLAN-ID">000</P>
                   <P type="VLAN-PRIORITY">4</P>
-                  <P type="MAC-Address">01-0C-CD-01-00-02</P>
+                  <P type="MAC-Address">01-0C-CD-01-00-01</P>
                   <P type="APPID">0001</P>
                </Address>
                <MinTime unit="s" multiplier="m">250</MinTime>
@@ -39,8 +39,8 @@
             </Address>
             <GSE ldInst="LD_PC" cbName="CB_FROM_PC">
                <Address>
-                  <P type="MAC-Address">01-0C-CD-01-00-01</P>
-                  <P type="APPID">0003</P>
+                  <P type="MAC-Address">01-0C-CD-01-00-02</P>
+                  <P type="APPID">0002</P>
                </Address>
                <MinTime unit="s" multiplier="m">250</MinTime>
                <MaxTime unit="s" multiplier="m">2000</MaxTime>
@@ -48,7 +48,7 @@
             <GSE ldInst="LD_RTLAB" cbName="CB_TO_PC">
                <Address>
                   <P type="MAC-Address">01-0C-CD-01-00-01</P>
-                  <P type="APPID">0004</P>
+                  <P type="APPID">0001</P>
                </Address>
                <MinTime unit="s" multiplier="m">250</MinTime>
             </GSE>
