@@ -99,8 +99,8 @@ public class IEC61850_GOOSE_API
 				gooseFrame.stNum = 1;
 			}
 			
-			// Now, we need to set the sequence number to 1
-			gooseFrame.sqNum = 1;
+			// Now, we need to set the sequence number to 0
+			gooseFrame.sqNum = 0;
 			
 			// Now we update the packet
 			try 
@@ -205,6 +205,7 @@ public class IEC61850_GOOSE_API
 					// The Goose Header is Valid
 					else
 	            	{
+						// We try to identify if this packet is part of a registered stream
 						if(receiveFrameTaskMap.containsKey(packet_goose_header.goID()))
 	            		{
 	            			// We check if the IEC61850_GOOSE_ReceiveTask is enabled
@@ -212,6 +213,7 @@ public class IEC61850_GOOSE_API
 	            			
 	            			// We save the packet for future use
 							current_task.goose_memoryPacket = new JMemoryPacket(incomingPacket.packet);
+							current_task.goose_header = packet_goose_header;
 	            			
 	            			if(current_task.current_state != IEC61850_GOOSE_ReceiveTask.WatchdogTask_State.stopped)
 	            			{

@@ -391,6 +391,7 @@ public class IEC61850_GOOSE_Frame {
 		}
 		else // if larger, we wrap
 		{
+			// When wrapping, we skip 0 (IEC61850-8-1 2004 PAGE 70)
 			sqNum = 1;
 		}
 		
